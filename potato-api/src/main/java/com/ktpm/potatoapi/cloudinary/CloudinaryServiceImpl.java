@@ -29,7 +29,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                     )
             );
             String publicId = uploadedFile.get("public_id").toString();
-            return cloudinary.url().secure(true).generate(publicId);
+            return cloudinary.url().generate(publicId);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
