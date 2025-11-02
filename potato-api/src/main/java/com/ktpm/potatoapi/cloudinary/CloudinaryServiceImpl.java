@@ -18,15 +18,11 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     Cloudinary cloudinary;
 
     @Override
-    public String upload(MultipartFile file, String folderName, String objectName) {
+    public String upload(MultipartFile file, String folderName) {
         try {
-            Map uploadedFile = cloudinary.uploader().upload(
+            Map<?, ?> uploadedFile = cloudinary.uploader().upload(
                     file.getBytes(),
-                    ObjectUtils.asMap(
-                            "folder", folderName,
-                            "overwrite", true,
-                            "public_id", objectName
-                    )
+                    ObjectUtils.asMap("folder", folderName)
             );
             String publicId = uploadedFile.get("public_id").toString();
             return cloudinary.url().generate(publicId);

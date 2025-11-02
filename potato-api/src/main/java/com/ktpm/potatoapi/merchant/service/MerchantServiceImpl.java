@@ -199,7 +199,7 @@ public class MerchantServiceImpl implements MerchantService {
 
         merchantMapper.update(merchant, request);
         merchant.setCuisineTypes(mapCuisineTypes(request.getCuisineTypes()));
-        merchant.setImgUrl(uploadMerchantImage(imgFile, merchant.getName()));
+        merchant.setImgUrl(uploadMerchantImage(imgFile));
         merchantRepository.save(merchant);
 
         log.info("Updated {}'s information", merchant.getName());
@@ -267,7 +267,7 @@ public class MerchantServiceImpl implements MerchantService {
                 .collect(Collectors.toSet());
     }
 
-    private String uploadMerchantImage(MultipartFile file, String objectName) {
-        return cloudinaryService.upload(file, "merchants", objectName);
+    private String uploadMerchantImage(MultipartFile file) {
+        return cloudinaryService.upload(file, "merchants");
     }
 }
