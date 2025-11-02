@@ -47,7 +47,7 @@ public class CuisineTypeServiceImpl implements CuisineTypeService {
     public CuisineTypeResponse createCuisineType(CuisineTypeRequest request) {
         CuisineType cuisineType = new CuisineType();
         cuisineType.setName(request.getName());
-        cuisineType.setImgUrl(uploadCuisineTypeImage(request.getImgFile(), request.getName()));
+        cuisineType.setImgUrl(uploadCuisineTypeImage(request.getImgFile()));
 
         try {
             cuisineTypeRepository.save(cuisineType);
@@ -71,7 +71,7 @@ public class CuisineTypeServiceImpl implements CuisineTypeService {
         return mapper.toResponse(cuisineType);
     }
 
-    private String uploadCuisineTypeImage(MultipartFile file, String objectName) {
-        return cloudinaryService.upload(file, "cuisine_types", objectName);
+    private String uploadCuisineTypeImage(MultipartFile file) {
+        return cloudinaryService.upload(file, "cuisine_types");
     }
 }

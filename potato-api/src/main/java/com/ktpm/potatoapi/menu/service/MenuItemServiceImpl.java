@@ -83,7 +83,7 @@ public class MenuItemServiceImpl implements MenuItemService {
         Merchant merchant = securityUtils.getCurrentMerchant();
 
         MenuItem menuItem = menuItemMapper.toEntity(menuItemRequest);
-        menuItem.setImgUrl(uploadMenuItemImage(menuItemRequest.getImgFile(), menuItem.getName()));
+        menuItem.setImgUrl(uploadMenuItemImage(menuItemRequest.getImgFile()));
         menuItem.setCategory(category);
         menuItem.setMerchant(merchant);
 
@@ -113,7 +113,7 @@ public class MenuItemServiceImpl implements MenuItemService {
 
         menuItemMapper.updateMenuItem(menuItem, menuItemRequest);
         menuItem.setCategory(category);
-        menuItem.setImgUrl(uploadMenuItemImage(menuItemRequest.getImgFile(), menuItem.getName()));
+        menuItem.setImgUrl(uploadMenuItemImage(menuItemRequest.getImgFile()));
         menuItemRepository.save(menuItem);
 
         log.info("{} updated item {} in category {}", merchant.getName(), menuItem.getName(), category.getName());
@@ -157,7 +157,7 @@ public class MenuItemServiceImpl implements MenuItemService {
         log.info("Delete menu item {}", menuItem.getName());
     }
 
-    private String uploadMenuItemImage(MultipartFile file, String objectName) {
-        return cloudinaryService.upload(file, "menu_items", objectName);
+    private String uploadMenuItemImage(MultipartFile file) {
+        return cloudinaryService.upload(file, "menu_items");
     }
 }
