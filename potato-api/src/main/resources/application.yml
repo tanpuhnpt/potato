@@ -36,3 +36,9 @@ cloudinary:
 
 app:
   server-url: ${APP_SERVER_URL:http://localhost:8080}
+
+vnpay:
+  url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  returnUrl: "http://localhost:8080/potato-api/payment/call-back"
+  tmnCode: L0SFF0BY
+  secretKey: IW1J6E4EK1E3NEF1GUIXUUMUFVLRLWYO
