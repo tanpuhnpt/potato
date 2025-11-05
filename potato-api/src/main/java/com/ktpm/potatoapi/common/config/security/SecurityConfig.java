@@ -28,7 +28,8 @@ public class SecurityConfig {
     CustomAccessDeniedHandler customAccessDeniedHandler;
     String[] OPENAPI_ENDPOINTS = {"/v3/api-docs/**", "/swagger-ui/**"};
     String[] PUBLIC_ENDPOINTS = {
-            "/auth/**", "/merchant/register",
+            "/auth/**",
+            "/merchant/register", "/merchant/upload-transaction-proof",
             "/cuisine-types", "/merchant/cuisine-types",
             "/merchants/{merchantId}/categories", "/merchants", "/merchants/{id}",
             "/menu-items/{menuItemId}", "/merchants/{merchantId}/menu-items",

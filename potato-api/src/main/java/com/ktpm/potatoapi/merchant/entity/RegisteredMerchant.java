@@ -26,6 +26,7 @@ public class RegisteredMerchant {
     String merchantName;
 
     String address;
+    String imgUrl;
 
     @Enumerated(EnumType.STRING)
     RegistrationStatus registrationStatus;
