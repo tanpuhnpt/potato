@@ -121,6 +121,15 @@ public enum ErrorCode {
     RATING_ORDER_NULL(10001, "Order is required for rating", HttpStatus.BAD_REQUEST),
     RATING_NULL(10002, "Rating value is required", HttpStatus.BAD_REQUEST),
     RATING_OUT_OF_RANGE(10003, "Rating value must be in the range of {min} to {max}", HttpStatus.BAD_REQUEST),
+
+    // CART ERROR
+    CART_MENU_ITEM_NULL(11001, "Menu item in cart is required", HttpStatus.BAD_REQUEST),
+    CART_MENU_ITEM_QUANTITY_NULL(11002, "Menu item's quantity in cart is required", HttpStatus.BAD_REQUEST),
+    CART_MENU_ITEM_QUANTITY_NEG_OR_ZERO(
+            11003,
+            "Menu item's quantity in cart must be greater than or equal to 0",
+            HttpStatus.BAD_REQUEST
+    ),
     ;
 
     private final int code;
