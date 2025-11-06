@@ -18,4 +18,5 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
     void deleteByCategoryId(@Param("categoryId") Long categoryId);
 
     List<MenuItem> findAllByIdInAndMerchantIdAndIsActiveTrue(List<Long> menuItemIds, Long merchantId);
+    Optional<MenuItem> findByIdAndIsVisibleTrue(Long menuItemId);
 }
