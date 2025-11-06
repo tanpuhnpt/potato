@@ -220,7 +220,7 @@ public class OrderServiceImpl implements OrderService {
         long subtotal = menuItem.getBasePrice();
         List<Long> selectedOptionValueIds = cartItem.getOptionValueIds();
         if (!selectedOptionValueIds.isEmpty()) {
-            List<OptionValue> optionValues = optionValueRepository.findAllByIdAndIsVisibleTrue(selectedOptionValueIds);
+            List<OptionValue> optionValues = optionValueRepository.findAllByIdInAndIsVisibleTrue(selectedOptionValueIds);
             if (optionValues.size() != selectedOptionValueIds.size())
                 throw new AppException(ErrorCode.OPTION_VALUE_NOT_FOUND);
 
