@@ -171,7 +171,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Merchant getMerchantFromMenuItemId(Long menuItemId) {
-        MenuItem firstMenuItem = menuItemRepository.findById(menuItemId)
+           MenuItem firstMenuItem = menuItemRepository.findByIdAndIsVisibleTrue(menuItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.MENU_ITEM_NOT_FOUND));
         return firstMenuItem.getMerchant();
     }
@@ -187,11 +187,8 @@ public class OrderServiceImpl implements OrderService {
         long total = 0L;
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItemRequest cartItem : orderRequest.getCartItems()) {
-            MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItemId())
+            MenuItem menuItem = menuItemRepository.findByIdAndIsVisibleTrue(cartItem.getMenuItemId())
                     .orElseThrow(() -> new AppException(ErrorCode.MENU_ITEM_NOT_FOUND));
-
-            // kiểm tra món có visible không
-            if (!menuItem.isVisible()) throw new AppException(ErrorCode.MENU_ITEM_INVISIBLE);
 
             OrderItem orderItem = buildOrderItem(cartItem, menuItem, order);
             orderItemRepository.save(orderItem); // lưu để tạo id
@@ -223,7 +220,7 @@ public class OrderServiceImpl implements OrderService {
         long subtotal = menuItem.getBasePrice();
         List<Long> selectedOptionValueIds = cartItem.getOptionValueIds();
         if (!selectedOptionValueIds.isEmpty()) {
-            List<OptionValue> optionValues = optionValueRepository.findAllById(selectedOptionValueIds);
+            List<OptionValue> optionValues = optionValueRepository.findAllByIdAndIsVisibleTrue(selectedOptionValueIds);
             if (optionValues.size() != selectedOptionValueIds.size())
                 throw new AppException(ErrorCode.OPTION_VALUE_NOT_FOUND);
 
@@ -231,9 +228,6 @@ public class OrderServiceImpl implements OrderService {
             Set<Long> seenRequiredOptions = new HashSet<>();
 
             for (OptionValue optionValue : optionValues) {
-                // kiểm tra option value có visible không
-                if (!optionValue.isVisible()) throw new AppException(ErrorCode.OPTION_VALUE_INVISIBLE);
-
                 Option parentOption = optionValue.getOption();
 
                 // kiểm tra option có liên kết với menuItem không
