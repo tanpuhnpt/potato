@@ -1,5 +1,6 @@
 package com.ktpm.potatoapi.merchant.service;
 
+import com.ktpm.potatoapi.merchant.dto.*;
 import com.ktpm.potatoapi.user.entity.Role;
 import com.ktpm.potatoapi.user.entity.User;
 import com.ktpm.potatoapi.user.repo.UserRepository;
@@ -10,10 +11,6 @@ import com.ktpm.potatoapi.common.utils.SecurityUtils;
 import com.ktpm.potatoapi.cuisinetype.entity.CuisineType;
 import com.ktpm.potatoapi.cuisinetype.repo.CuisineTypeRepository;
 import com.ktpm.potatoapi.mail.MailService;
-import com.ktpm.potatoapi.merchant.dto.MerchantRegistrationRequest;
-import com.ktpm.potatoapi.merchant.dto.MerchantRegistrationResponse;
-import com.ktpm.potatoapi.merchant.dto.MerchantResponse;
-import com.ktpm.potatoapi.merchant.dto.MerchantUpdateRequest;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.merchant.entity.RegisteredMerchant;
 import com.ktpm.potatoapi.merchant.entity.RegistrationStatus;
@@ -98,13 +95,45 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
-    @Transactional
-    public MerchantRegistrationResponse approveMerchant(Long id) throws MessagingException {
+    public MerchantRegistrationResponse confirmRegistration(Long id) throws MessagingException {
         RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
 
         if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.PENDING)
             throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_PENDING);
+
+        mailService.sendEmail(registeredMerchant.getEmail(), registeredMerchant.getFullName());
+
+        registeredMerchant.setRegistrationStatus(RegistrationStatus.CONFIRMED);
+        registeredMerchantRepository.save(registeredMerchant);
+
+        MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
+        response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
+        return response;
+    }
+
+    @Override
+    public MerchantRegistrationResponse uploadTransactionImg(TransactionUploadRequest request) {
+        RegisteredMerchant registeredMerchant = registeredMerchantRepository.findByMerchantName(request.getMerchantName())
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
+
+        registeredMerchant.setImgUrl(uploadTransactionImage(request.getImgFile()));
+        registeredMerchant.setRegistrationStatus(RegistrationStatus.PAID);
+        registeredMerchantRepository.save(registeredMerchant);
+
+        MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
+        response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public MerchantRegistrationResponse approveMerchant(Long id) throws MessagingException {
+        RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
+
+        if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.CONFIRMED)
+            throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_CONFIRMED);
 
         // tạo account cho merchant admin
         String rawPassword = "12345678"; // default password
@@ -269,5 +298,9 @@ public class MerchantServiceImpl implements MerchantService {
 
     private String uploadMerchantImage(MultipartFile file) {
         return cloudinaryService.upload(file, "merchants");
+    }
+
+    private String uploadTransactionImage(MultipartFile file) {
+        return cloudinaryService.upload(file, "registration transaction");
     }
 }

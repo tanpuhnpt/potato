@@ -2,6 +2,7 @@ package com.ktpm.potatoapi.merchant.controller;
 
 import com.ktpm.potatoapi.merchant.dto.MerchantRegistrationRequest;
 import com.ktpm.potatoapi.merchant.dto.MerchantUpdateRequest;
+import com.ktpm.potatoapi.merchant.dto.TransactionUploadRequest;
 import com.ktpm.potatoapi.merchant.service.MerchantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,6 +44,20 @@ public class MerchantController {
             description = "API for System Admin to approve a registered merchant")
     public ResponseEntity<?> approveMerchant(@PathVariable Long id) throws MessagingException {
         return ResponseEntity.ok(merchantService.approveMerchant(id));
+    }
+
+    @PostMapping("/admin/registered-merchants/{id}/confirm")
+    @Operation(summary = "Confirm a registered merchant",
+            description = "API for System Admin to confirm a registered merchant")
+    public ResponseEntity<?> confirmRegistration(@PathVariable Long id) throws MessagingException {
+        return ResponseEntity.ok(merchantService.confirmRegistration(id));
+    }
+
+    @PostMapping(path = "/merchant/upload-transaction-proof", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload transaction image",
+            description = "API for Merchant Admin to upload transaction image")
+    public ResponseEntity<?> uploadTransactionImg(@ModelAttribute @Valid TransactionUploadRequest request) {
+        return ResponseEntity.ok(merchantService.uploadTransactionImg(request));
     }
 
     @GetMapping("/admin/merchants")

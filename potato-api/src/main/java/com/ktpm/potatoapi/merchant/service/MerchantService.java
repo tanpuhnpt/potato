@@ -1,9 +1,6 @@
 package com.ktpm.potatoapi.merchant.service;
 
-import com.ktpm.potatoapi.merchant.dto.MerchantRegistrationRequest;
-import com.ktpm.potatoapi.merchant.dto.MerchantRegistrationResponse;
-import com.ktpm.potatoapi.merchant.dto.MerchantResponse;
-import com.ktpm.potatoapi.merchant.dto.MerchantUpdateRequest;
+import com.ktpm.potatoapi.merchant.dto.*;
 import jakarta.mail.MessagingException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +10,8 @@ public interface MerchantService {
     // services for merchant on-boarding
     List<MerchantRegistrationResponse> getAllRegisteredMerchants();
     MerchantRegistrationResponse registerMerchant(MerchantRegistrationRequest request);
+    MerchantRegistrationResponse confirmRegistration(Long id) throws MessagingException;
+    MerchantRegistrationResponse uploadTransactionImg(TransactionUploadRequest request);
     MerchantRegistrationResponse approveMerchant(Long id) throws MessagingException;
 
     // services for SYSTEM ADMIN
