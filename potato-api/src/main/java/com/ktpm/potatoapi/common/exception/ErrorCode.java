@@ -121,6 +121,10 @@ public enum ErrorCode {
     RATING_ORDER_NULL(10001, "Order is required for rating", HttpStatus.BAD_REQUEST),
     RATING_NULL(10002, "Rating value is required", HttpStatus.BAD_REQUEST),
     RATING_OUT_OF_RANGE(10003, "Rating value must be in the range of {min} to {max}", HttpStatus.BAD_REQUEST),
+
+    // TRANSACTION ERROR
+    TRANSACTION_DESCRIPTION_BLANK(12001, "Description of transaction is required", HttpStatus.BAD_REQUEST),
+    TRANSACTION_IMG_NULL(12002, "Image of transaction is required", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
