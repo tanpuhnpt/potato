@@ -1,7 +1,7 @@
 package com.ktpm.potatoapi.cart.dto;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,7 +17,7 @@ public class CartItemRequest {
     Long menuItemId;
 
     @NotNull(message = "CART_MENU_ITEM_QUANTITY_NULL")
-    @PositiveOrZero(message = "CART_MENU_ITEM_QUANTITY_NEG")
+    @Positive(message = "CART_MENU_ITEM_QUANTITY_NEG_OR_ZERO")
     Integer quantity;
 
     String note;

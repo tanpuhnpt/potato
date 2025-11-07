@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface OptionValueRepository extends JpaRepository<OptionValue, Long> {
     Optional<OptionValue> findByIdAndIsActiveTrue(Long valueId);
-    List<OptionValue> findAllByIdAndIsVisibleTrue(List<Long> selectedOptionValueIds);
+    List<OptionValue> findAllByIdInAndIsVisibleTrue(List<Long> selectedOptionValueIds);
 }
