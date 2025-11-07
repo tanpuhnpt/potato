@@ -171,7 +171,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Merchant getMerchantFromMenuItemId(Long menuItemId) {
-           MenuItem firstMenuItem = menuItemRepository.findByIdAndIsVisibleTrue(menuItemId)
+        MenuItem firstMenuItem = menuItemRepository.findByIdAndIsVisibleTrue(menuItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.MENU_ITEM_NOT_FOUND));
         return firstMenuItem.getMerchant();
     }

@@ -130,6 +130,10 @@ public enum ErrorCode {
             "Menu item's quantity in cart must be greater than or equal to 0",
             HttpStatus.BAD_REQUEST
     ),
+  
+    // TRANSACTION ERROR
+    TRANSACTION_DESCRIPTION_BLANK(12001, "Description of transaction is required", HttpStatus.BAD_REQUEST),
+    TRANSACTION_IMG_NULL(12002, "Image of transaction is required", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
