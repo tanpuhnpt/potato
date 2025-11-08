@@ -1,4 +1,4 @@
-package com.ktpm.potatoapi.rating.entity;
+package com.ktpm.potatoapi.feedback.entity;
 
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.order.entity.Order;
@@ -7,6 +7,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -14,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Rating {
+public class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +27,22 @@ public class Rating {
     Merchant merchant;
 
     @ManyToOne
-    User customer;
+    User user;
 
     @ManyToOne
-    @JoinColumn(unique = true)
     Order order;
 
     Integer rating;
+    LocalDateTime createdAt;
+
+    @Column(columnDefinition = "TEXT")
+    String comment;
+
+    @ElementCollection
+    List<String> imgUrl;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
