@@ -268,7 +268,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantResponse getMerchantForCustomer(Long id) {
-        Merchant merchant = merchantRepository.findById(id)
+        Merchant merchant = merchantRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
 
         if (!merchant.isOpen())
