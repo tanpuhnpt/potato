@@ -4,14 +4,17 @@ import com.ktpm.potatoapi.cloudinary.CloudinaryService;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
 import com.ktpm.potatoapi.common.utils.SecurityUtils;
-import com.ktpm.potatoapi.feedback.dto.GiveFeedbackRequest;
-import com.ktpm.potatoapi.feedback.entity.Feedback;
-import com.ktpm.potatoapi.feedback.repo.FeedbackRepository;
+import com.ktpm.potatoapi.feedback.dto.FeedbackResponse;
+import com.ktpm.potatoapi.feedback.dto.ReplyFeedbackRequest;
+import com.ktpm.potatoapi.feedback.mapper.FeedbackMapper;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.merchant.repo.MerchantRepository;
 import com.ktpm.potatoapi.order.entity.Order;
 import com.ktpm.potatoapi.order.entity.OrderStatus;
 import com.ktpm.potatoapi.order.repo.OrderRepository;
+import com.ktpm.potatoapi.feedback.dto.GiveFeedbackRequest;
+import com.ktpm.potatoapi.feedback.entity.Feedback;
+import com.ktpm.potatoapi.feedback.repo.FeedbackRepository;
 import com.ktpm.potatoapi.user.entity.User;
 import com.ktpm.potatoapi.user.repo.UserRepository;
 import lombok.AccessLevel;
@@ -37,6 +40,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     MerchantRepository merchantRepository;
     SecurityUtils securityUtils;
     CloudinaryService cloudinaryService;
+    FeedbackMapper mapper;
 
     @Override
     @Transactional
@@ -73,6 +77,28 @@ public class FeedbackServiceImpl implements FeedbackService {
         merchantRepository.save(merchant);
     }
 
+    @Override
+    public FeedbackResponse replyFeedback(ReplyFeedbackRequest request) {
+        User merchantAdmin = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Order order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        Merchant merchant = securityUtils.getCurrentMerchant();
+
+        // Check xem order đã ở trạng thái COMPLETED chưa
+        if (order.getStatus() != OrderStatus.COMPLETED)
+            throw new AppException(ErrorCode.ORDER_NOT_COMPLETED);
+
+        // Check lại xem order này có phải thuộc về merchant này không
+        if (!orderRepository.existsByIdAndMerchantId(order.getId(), merchant.getId()))
+            throw new AppException(ErrorCode.ORDER_NOT_OWNED_BY_CURRENT_MERCHANT);
+
+        Feedback feedback = buildReplyFeedback(merchantAdmin, order, request);
+        feedbackRepository.save(feedback);
+
+        return mapper.toResponse(feedback);
+    }
+
     private List<String> uploadReviewImage(List<MultipartFile> imgFiles) {
         List<String> imgUrls = new ArrayList<>();
         for (MultipartFile file : imgFiles)
@@ -87,6 +113,14 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .order(order)
                 .merchant(merchant)
                 .rating(request.getRating())
+                .comment(request.getComment())
+                .build();
+    }
+
+    private Feedback buildReplyFeedback(User merchantAdmin, Order order, ReplyFeedbackRequest request) {
+        return Feedback.builder()
+                .user(merchantAdmin)
+                .order(order)
                 .comment(request.getComment())
                 .build();
     }

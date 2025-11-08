@@ -1,6 +1,7 @@
 package com.ktpm.potatoapi.feedback.controller;
 
 import com.ktpm.potatoapi.feedback.dto.GiveFeedbackRequest;
+import com.ktpm.potatoapi.feedback.dto.ReplyFeedbackRequest;
 import com.ktpm.potatoapi.feedback.service.FeedbackService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,5 +29,12 @@ public class FeedbackController {
     public ResponseEntity<?> giveFeedBack(@ModelAttribute @Valid GiveFeedbackRequest request) {
         feedbackService.giveFeedback(request);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/merchant/reply-feedback")
+    @Operation(summary = "Reply a feedback",
+            description = "API for Merchant Admin to reply a feedback to Customer")
+    public ResponseEntity<?> replyFeedBack(@RequestBody @Valid ReplyFeedbackRequest request) {
+        return ResponseEntity.ok(feedbackService.replyFeedback(request));
     }
 }

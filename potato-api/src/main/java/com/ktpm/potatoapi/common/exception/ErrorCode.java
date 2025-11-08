@@ -114,7 +114,6 @@ public enum ErrorCode {
     ORDER_STATUS_NOT_STEP_BY_STEP(9010, "Order status must be step by step", HttpStatus.BAD_REQUEST),
     CANCEL_REASON_EMPTY(9011, "A reason is required when canceling an order", HttpStatus.BAD_REQUEST),
     ORDER_NOT_COMPLETED(9012, "The order has not been completed to rate", HttpStatus.BAD_REQUEST),
-    ORDER_NOT_OWNED_BY_CURRENT_USER(9013, "The order is not owned by this user", HttpStatus.BAD_REQUEST),
     ORDER_RATED(9014, "This order is already rated", HttpStatus.BAD_REQUEST),
 
     // RATING ERROR,
@@ -134,6 +133,10 @@ public enum ErrorCode {
     // TRANSACTION ERROR
     TRANSACTION_DESCRIPTION_BLANK(12001, "Description of transaction is required", HttpStatus.BAD_REQUEST),
     TRANSACTION_IMG_NULL(12002, "Image of transaction is required", HttpStatus.BAD_REQUEST),
+
+    // FEEDBACK ERROR
+    ORDER_NOT_OWNED_BY_CURRENT_USER(13001, "The order is not owned by this user", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_OWNED_BY_CURRENT_MERCHANT(13002, "The order is not owned by this merchant", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
