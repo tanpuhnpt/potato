@@ -27,10 +27,10 @@ public class OrderController {
     }
 
     @GetMapping("/my-orders")
-    @Operation(summary = "Show all orders of Customer",
-            description = "API for Customer to retrieve a list of orders")
-    public ResponseEntity<?> getAllOrdersOfCustomer() {
-        return ResponseEntity.ok(orderService.getAllOrdersOfCustomer());
+    @Operation(summary = "Show orders in progress",
+            description = "API for Customer to retrieve a list of orders which are confirmed/delivering")
+    public ResponseEntity<?> getAllOrdersInProgress() {
+        return ResponseEntity.ok(orderService.getAllOrdersInProgress());
     }
 
     @GetMapping("/merchant/my-orders")

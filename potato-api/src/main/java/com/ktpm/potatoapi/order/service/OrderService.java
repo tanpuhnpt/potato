@@ -9,7 +9,7 @@ import java.util.List;
 public interface OrderService {
     // services for customer
     OrderResponse createOrder(OrderRequest cartOrderRequest);
-    List<OrderResponse> getAllOrdersOfCustomer();
+    List<OrderResponse> getAllOrdersInProgress();
 
     // mutual service
     OrderResponse getOrderDetail(Long orderId);
