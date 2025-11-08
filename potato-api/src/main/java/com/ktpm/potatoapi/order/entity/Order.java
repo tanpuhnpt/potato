@@ -2,6 +2,7 @@ package com.ktpm.potatoapi.order.entity;
 
 import com.ktpm.potatoapi.common.utils.OrderCodeUtils;
 import com.ktpm.potatoapi.common.utils.PhoneUtils;
+import com.ktpm.potatoapi.feedback.entity.Feedback;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.user.entity.User;
 import jakarta.persistence.*;
@@ -47,6 +48,9 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderItem> orderItems;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    List<Feedback> feedbacks;
 
     @PrePersist
     protected void onCreate() {

@@ -1,5 +1,6 @@
 package com.ktpm.potatoapi.order.dto;
 
+import com.ktpm.potatoapi.feedback.dto.FeedbackResponse;
 import com.ktpm.potatoapi.order.entity.OrderStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -26,4 +27,5 @@ public class OrderResponse {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     List<OrderItemResponse> orderItems;
+    List<FeedbackResponse> feedbacks;
 }
