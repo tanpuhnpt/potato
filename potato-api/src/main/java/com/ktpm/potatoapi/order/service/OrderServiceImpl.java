@@ -96,6 +96,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderResponse> getOrderHistory() {
+        User customer = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        List<Order> orders = orderRepository.getOrderHistoryByCustomer(customer.getId());
+        for(Order order : orders) {
+            List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
+            OrderResponse orderResponse = orderMapper.toResponse(order);
+            orderResponse.setOrderItems(orderItemResponses);
+            orderResponses.add(orderResponse);
+        }
+        return orderResponses;
+    }
+
+    @Override
     public OrderResponse getOrderDetail(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));

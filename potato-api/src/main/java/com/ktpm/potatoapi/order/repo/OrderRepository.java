@@ -19,4 +19,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         AND o.status = 'CONFIRMED' or o.status = 'DELIVERING'
     """)
     List<Order> getOrderInProgressByCustomer(@Param("customerId") Long customerId);
+
+    @Query(value = """
+        FROM Order o
+        WHERE o.customer.id = :customerId
+        AND o.status = 'COMPLETED' or o.status = 'CANCELED'
+    """)
+    List<Order> getOrderHistoryByCustomer(@Param("customerId") Long customerId);
 }

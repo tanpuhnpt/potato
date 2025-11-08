@@ -33,6 +33,13 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrdersInProgress());
     }
 
+    @GetMapping("/my-order-history")
+    @Operation(summary = "Show order history for Customer",
+            description = "API for Customer to retrieve a list of orders which are completed/canceled")
+    public ResponseEntity<?> getOrderHistory() {
+        return ResponseEntity.ok(orderService.getOrderHistory());
+    }
+
     @GetMapping("/merchant/my-orders")
     @Operation(summary = "Show all orders of Merchant",
             description = "API for Merchant Admin to retrieve a list of all orders from Customer")

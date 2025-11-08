@@ -10,6 +10,7 @@ public interface OrderService {
     // services for customer
     OrderResponse createOrder(OrderRequest cartOrderRequest);
     List<OrderResponse> getAllOrdersInProgress();
+    List<OrderResponse> getOrderHistory();
 
     // mutual service
     OrderResponse getOrderDetail(Long orderId);
