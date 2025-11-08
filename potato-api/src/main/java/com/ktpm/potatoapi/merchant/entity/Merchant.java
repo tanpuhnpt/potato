@@ -40,7 +40,6 @@ public class Merchant {
     int ratingCount;
     boolean isActive;
     boolean isOpen;
-
     String imgUrl;
 
     @OneToOne

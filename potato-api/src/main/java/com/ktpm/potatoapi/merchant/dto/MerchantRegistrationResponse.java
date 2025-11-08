@@ -19,4 +19,5 @@ public class MerchantRegistrationResponse {
     String address;
     Set<String> cuisineTypes;
     RegistrationStatus registrationStatus;
+    String imgUrl;
 }
