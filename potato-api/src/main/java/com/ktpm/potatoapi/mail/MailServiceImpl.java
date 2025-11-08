@@ -26,12 +26,12 @@ public class MailServiceImpl implements MailService {
     String mailFrom;
 
     @Override
-    public void sendApprovalEmail(String mailTo, String fullName, String password) throws MessagingException {
+    public void sendMerchantActivationEmail(String mailTo, String fullName, String password) throws MessagingException {
         Context context = new Context();
         context.setVariable("fullName", fullName);
         context.setVariable("password", password);
 
-        String htmlContent = templateEngine.process("email/account_approved", context);
+        String htmlContent = templateEngine.process("email/merchant_activated", context);
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

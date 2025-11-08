@@ -95,7 +95,7 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
-    public MerchantRegistrationResponse confirmRegistration(Long id) throws MessagingException {
+    public MerchantRegistrationResponse approveRegistration(Long id) throws MessagingException {
         RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
 
@@ -129,7 +129,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     @Transactional
-    public MerchantRegistrationResponse approveMerchant(Long id) throws MessagingException {
+    public MerchantRegistrationResponse activateMerchant(Long id) throws MessagingException {
         RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
 
@@ -159,8 +159,8 @@ public class MerchantServiceImpl implements MerchantService {
                 .build();
         merchantRepository.save(merchant);
 
-        // gửi mail phê duyệt
-        mailService.sendApprovalEmail(registeredMerchant.getEmail(), merchant.getName(), rawPassword);
+        // gửi mail kích hoạt
+        mailService.sendMerchantActivationEmail(registeredMerchant.getEmail(), merchant.getName(), rawPassword);
 
         log.info("Approve and Created merchant {}", merchant.getName());
 
