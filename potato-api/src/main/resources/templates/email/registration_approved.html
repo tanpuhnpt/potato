@@ -31,11 +31,11 @@
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            Your admin account has been successfully approved in the Potato App system.
+                            Your merchant registration has been successfully approved in the Potato App system.
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            Please make a bank transfer to the following account:
+                            To complete the registration process, please make a bank transfer for the <strong>Merchant Registration Fee</strong> to the following account:
                         </p>
 
                         <div style="background-color: #f8f6f2; border-left: 4px solid #d6b36a; padding: 15px; margin: 20px 0; border-radius: 5px;">
@@ -43,12 +43,19 @@
                                 <strong>Bank Information:</strong><br/>
                                 🏦 <strong>Bank:</strong> Vietcombank<br/>
                                 💳 <strong>Account Number:</strong> 0123456789<br/>
-                                👤 <strong>Account Holder:</strong> Potato Company
+                                👤 <strong>Account Holder:</strong> Potato Company<br/>
+                                💰 <strong>Transfer Content:</strong> MERCHANT REGISTRATION FEE - <span th:text="${merchantName}"></span>
                             </p>
                         </div>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            After completing the transfer, please upload the payment confirmation image to the system.
+                            After completing the transfer, please upload your payment confirmation image via the following link:
+                        </p>
+
+                        <p style="text-align: center; margin: 20px 0;">
+                            <a href="http://localhost:8080/potato-api/merchant/upload-transaction-proof">
+                                Upload Transaction Proof
+                            </a>
                         </p>
                         <br/>
                         <p style="color: #444444; font-size: 15px; line-height: 1.6;">

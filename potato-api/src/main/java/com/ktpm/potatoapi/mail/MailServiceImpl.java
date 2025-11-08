@@ -45,9 +45,10 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendEmail(String mailTo, String fullName) throws MessagingException {
+    public void sendRegistrationApprovalEmail(String mailTo, String fullName, String merchantName) throws MessagingException {
         Context context = new Context();
         context.setVariable("fullName", fullName);
+        context.setVariable("merchantName", merchantName);
 
         String htmlContent = templateEngine.process("email/registration_approved", context);
 

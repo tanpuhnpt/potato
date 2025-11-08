@@ -102,7 +102,8 @@ public class MerchantServiceImpl implements MerchantService {
         if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.PENDING)
             throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_PENDING);
 
-        mailService.sendEmail(registeredMerchant.getEmail(), registeredMerchant.getFullName());
+        mailService.sendRegistrationApprovalEmail(registeredMerchant.getEmail(),
+                registeredMerchant.getFullName(), registeredMerchant.getMerchantName());
 
         registeredMerchant.setRegistrationStatus(RegistrationStatus.CONFIRMED);
         registeredMerchantRepository.save(registeredMerchant);
