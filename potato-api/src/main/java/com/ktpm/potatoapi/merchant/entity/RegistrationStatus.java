@@ -2,7 +2,7 @@ package com.ktpm.potatoapi.merchant.entity;
 
 public enum RegistrationStatus {
     PENDING,
-    APPROVED,
+    APPROVED, REJECTED,
     PAID,
     COMPLETED
 }

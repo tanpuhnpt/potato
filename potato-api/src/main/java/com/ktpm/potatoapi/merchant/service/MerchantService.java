@@ -11,6 +11,7 @@ public interface MerchantService {
     List<MerchantRegistrationResponse> getAllRegisteredMerchants();
     MerchantRegistrationResponse registerMerchant(MerchantRegistrationRequest request);
     MerchantRegistrationResponse approveRegistration(Long id) throws MessagingException;
+    MerchantRegistrationResponse rejectRegistration(Long id) throws MessagingException;
     MerchantRegistrationResponse uploadTransactionImg(TransactionUploadRequest request);
     MerchantRegistrationResponse activateMerchant(Long id) throws MessagingException;
 

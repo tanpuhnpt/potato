@@ -47,10 +47,17 @@ public class MerchantController {
     }
 
     @PostMapping("/admin/registered-merchants/{id}/approve")
-    @Operation(summary = "Approved a registered merchant",
-            description = "API for System Admin to approved a registered merchant")
+    @Operation(summary = "Approve a registered merchant",
+            description = "API for System Admin to approve a registered merchant")
     public ResponseEntity<?> approveRegistration(@PathVariable Long id) throws MessagingException {
         return ResponseEntity.ok(merchantService.approveRegistration(id));
+    }
+
+    @PostMapping("/admin/registered-merchants/{id}/reject")
+    @Operation(summary = "Reject a registered merchant",
+            description = "API for System Admin to reject a registered merchant")
+    public ResponseEntity<?> rejectRegistration(@PathVariable Long id) throws MessagingException {
+        return ResponseEntity.ok(merchantService.rejectRegistration(id));
     }
 
     @PostMapping(path = "/merchant/upload-transaction-proof", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

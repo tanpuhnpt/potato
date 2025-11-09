@@ -115,6 +115,24 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
+    public MerchantRegistrationResponse rejectRegistration(Long id) throws MessagingException {
+        RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
+
+        if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.PENDING)
+            throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_PENDING);
+
+        mailService.sendRegistrationRejectionEmail(registeredMerchant.getEmail(), registeredMerchant.getFullName());
+
+        registeredMerchant.setRegistrationStatus(RegistrationStatus.REJECTED);
+        registeredMerchantRepository.save(registeredMerchant);
+
+        MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
+        response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
+        return response;
+    }
+
+    @Override
     public MerchantRegistrationResponse uploadTransactionImg(TransactionUploadRequest request) {
         RegisteredMerchant registeredMerchant = registeredMerchantRepository.findByMerchantName(request.getMerchantName())
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
