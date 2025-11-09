@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.util.Map;
+
 
 @Service
 @RequiredArgsConstructor
@@ -25,60 +27,61 @@ public class MailServiceImpl implements MailService {
     @Value("${spring.mail.username}")
     String mailFrom;
 
-    @Override
-    public void sendMerchantActivationEmail(String mailTo, String fullName, String password) throws MessagingException {
-        Context context = new Context();
-        context.setVariable("fullName", fullName);
-        context.setVariable("email", mailTo);
-        context.setVariable("password", password);
+    // generic  mail
+    private void sendEmail(String mailTo, String subject, String templateName, Map<String, Object> variables)
+            throws MessagingException {
 
-        String htmlContent = templateEngine.process("email/merchant_activated", context);
+        Context context = new Context();
+        context.setVariables(variables);
+
+        String htmlContent = templateEngine.process(templateName, context);
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         helper.setTo(mailTo);
         helper.setFrom(mailFrom);
-        helper.setSubject("Merchant Activated");
-        helper.setText(htmlContent, true); // Gửi dạng HTML
+        helper.setSubject(subject);
+        helper.setText(htmlContent, true);
 
         mailSender.send(message);
     }
 
     @Override
     public void sendRegistrationApprovalEmail(String mailTo, String fullName, String merchantName) throws MessagingException {
-        Context context = new Context();
-        context.setVariable("fullName", fullName);
-        context.setVariable("merchantName", merchantName);
-
-        String htmlContent = templateEngine.process("email/registration_approved", context);
-
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        helper.setTo(mailTo);
-        helper.setFrom(mailFrom);
-        helper.setSubject("Merchant Registration Review Result");
-        helper.setText(htmlContent, true); // Gửi dạng HTML
-
-        mailSender.send(message);
+        sendEmail(
+                mailTo,
+                "Merchant Registration Review Result",
+                "email/registration_approved",
+                Map.of(
+                        "fullName", fullName,
+                        "merchantName", merchantName
+                )
+        );
     }
 
     @Override
     public void sendRegistrationRejectionEmail(String mailTo, String fullName) throws MessagingException {
-        Context context = new Context();
-        context.setVariable("fullName", fullName);
+        sendEmail(
+                mailTo,
+                "Merchant Registration Review Result",
+                "email/registration_rejected",
+                Map.of("fullName", fullName)
+        );
+    }
 
-        String htmlContent = templateEngine.process("email/registration_rejected", context);
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        helper.setTo(mailTo);
-        helper.setFrom(mailFrom);
-        helper.setSubject("Merchant Registration Review Result");
-        helper.setText(htmlContent, true); // Gửi dạng HTML
-
-        mailSender.send(message);
+    @Override
+    public void sendMerchantActivationEmail(String mailTo, String fullName, String password) throws MessagingException {
+        sendEmail(
+                mailTo,
+                "Merchant Activated",
+                "email/merchant_activated",
+                Map.of(
+                        "fullName", fullName,
+                        "email", mailTo,
+                        "password", password
+                )
+        );
     }
 }
