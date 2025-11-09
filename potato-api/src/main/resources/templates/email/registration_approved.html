@@ -31,7 +31,7 @@
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            Your merchant registration has been successfully approved in the Potato App system.
+                            Your registration has been successfully approved in the Potato App system.
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
@@ -40,24 +40,22 @@
 
                         <div style="background-color: #f8f6f2; border-left: 4px solid #d6b36a; padding: 15px; margin: 20px 0; border-radius: 5px;">
                             <p style="color: #444444; font-size: 15px; line-height: 1.6; margin: 0;">
-                                <strong>Bank Information:</strong><br/>
-                                🏦 <strong>Bank:</strong> Vietcombank<br/>
-                                💳 <strong>Account Number:</strong> 0123456789<br/>
-                                👤 <strong>Account Holder:</strong> Potato Company<br/>
-                                💰 <strong>Amount:</strong> 1,200,000 VND<br/>
-                                🧾 <strong>Transfer Content:</strong> MERCHANT REGISTRATION FEE - <span th:text="${merchantName}"></span>
+                                <strong>Bank:</strong> Vietcombank<br/>
+                                <strong>Account Number:</strong> 0123456789<br/>
+                                <strong>Account Holder:</strong> Potato Company<br/>
+                                <strong>Amount:</strong> 1,200,000 VND<br/>
+                                <strong>Transfer Content:</strong> MERCHANT REGISTRATION FEE - <span th:text="${merchantName}"></span>
                             </p>
                         </div>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            After completing the transfer, please upload your payment confirmation image via the following link:
-                        </p>
-
-                        <p style="text-align: center; margin: 20px 0;">
+                            After completing the transfer, please upload your payment confirmation image via this link:
+                            <br/>
                             <a href="http://localhost:8080/potato-api/merchant/upload-transaction-proof">
-                                Upload Transaction Proof
+                                http://localhost:8080/potato-api/merchant/upload-transaction-proof
                             </a>
                         </p>
+
                         <br/>
                         <p style="color: #444444; font-size: 15px; line-height: 1.6;">
                             Best regards,<br/>
