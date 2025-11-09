@@ -39,7 +39,7 @@ public class MailServiceImpl implements MailService {
 
         helper.setTo(mailTo);
         helper.setFrom(mailFrom);
-        helper.setSubject("Merchant Admin Account Approved");
+        helper.setSubject("Merchant Activated");
         helper.setText(htmlContent, true); // Gửi dạng HTML
 
         mailSender.send(message);
