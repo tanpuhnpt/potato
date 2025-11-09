@@ -29,6 +29,7 @@ public class MailServiceImpl implements MailService {
     public void sendMerchantActivationEmail(String mailTo, String fullName, String password) throws MessagingException {
         Context context = new Context();
         context.setVariable("fullName", fullName);
+        context.setVariable("email", mailTo);
         context.setVariable("password", password);
 
         String htmlContent = templateEngine.process("email/merchant_activated", context);
