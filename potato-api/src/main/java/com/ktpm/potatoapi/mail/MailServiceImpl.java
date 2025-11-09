@@ -58,7 +58,7 @@ public class MailServiceImpl implements MailService {
 
         helper.setTo(mailTo);
         helper.setFrom(mailFrom);
-        helper.setSubject("Merchant Registration Approved");
+        helper.setSubject("Merchant Registration Review Result");
         helper.setText(htmlContent, true); // Gửi dạng HTML
 
         mailSender.send(message);
