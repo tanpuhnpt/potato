@@ -95,6 +95,7 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
+    @Transactional
     public MerchantRegistrationResponse approveRegistration(Long id) throws MessagingException {
         RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
@@ -105,7 +106,7 @@ public class MerchantServiceImpl implements MerchantService {
         mailService.sendRegistrationApprovalEmail(registeredMerchant.getEmail(),
                 registeredMerchant.getFullName(), registeredMerchant.getMerchantName());
 
-        registeredMerchant.setRegistrationStatus(RegistrationStatus.CONFIRMED);
+        registeredMerchant.setRegistrationStatus(RegistrationStatus.APPROVED);
         registeredMerchantRepository.save(registeredMerchant);
 
         MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
@@ -133,8 +134,8 @@ public class MerchantServiceImpl implements MerchantService {
         RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
 
-        if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.CONFIRMED)
-            throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_CONFIRMED);
+        if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.PAID)
+            throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_PAID);
 
         // tạo account cho merchant admin
         String rawPassword = "12345678"; // default password
@@ -148,7 +149,7 @@ public class MerchantServiceImpl implements MerchantService {
         log.info("Created merchant admin with mail: {}", registeredMerchant.getEmail());
 
         // cập nhật trạng thái đăng kí kinh doanh
-        registeredMerchant.setRegistrationStatus(RegistrationStatus.APPROVED);
+        registeredMerchant.setRegistrationStatus(RegistrationStatus.COMPLETED);
 
         // tạo merchant và gán merchant admin đã tạo
         Merchant merchant = Merchant.builder()
