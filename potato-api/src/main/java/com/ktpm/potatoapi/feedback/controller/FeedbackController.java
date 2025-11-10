@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,10 +28,24 @@ public class FeedbackController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/merchant/reply-feedback")
+    @GetMapping("/merchants/{merchantId}/feedbacks")
+    @Operation(summary = "Show all feedbacks for Customer",
+            description = "API for Customer to retrieve a list of all feedbacks of a merchant")
+    public ResponseEntity<?> getAllFeedbacksForCustomer(@PathVariable Long merchantId) {
+        return ResponseEntity.ok(feedbackService.getAllFeedbacksForCustomer(merchantId));
+    }
+
+    @PostMapping("/merchant/feedbacks/{id}/reply")
     @Operation(summary = "Reply a feedback",
             description = "API for Merchant Admin to reply a feedback to Customer")
-    public ResponseEntity<?> replyFeedBack(@RequestBody @Valid ReplyFeedbackRequest request) {
-        return ResponseEntity.ok(feedbackService.replyFeedback(request));
+    public ResponseEntity<?> replyFeedBack(@PathVariable Long id, @RequestBody ReplyFeedbackRequest request) {
+        return ResponseEntity.ok(feedbackService.replyFeedback(id, request));
+    }
+
+    @GetMapping("/merchant/feedbacks")
+    @Operation(summary = "Show all feedbacks for Merchant Admin",
+            description = "API for Merchant Admin to retrieve a list of all feedbacks")
+    public ResponseEntity<?> getAllFeedbacksOfMyMerchant() {
+        return ResponseEntity.ok(feedbackService.getAllFeedbacksOfMyMerchant());
     }
 }

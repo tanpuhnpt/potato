@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,4 +17,5 @@ public class FeedbackResponse {
     String comment;
     LocalDateTime createdAt;
     UserInFeedbackResponse user;
+    List<String> imgUrl;
 }

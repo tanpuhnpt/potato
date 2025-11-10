@@ -59,7 +59,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (!orderRepository.existsByIdAndCustomerId(order.getId(), customer.getId()))
             throw new AppException(ErrorCode.ORDER_NOT_OWNED_BY_CURRENT_USER);
 
-        Feedback feedback = buildGiveFeedback(customer, order, merchant, request);
+        Feedback feedback = buildFeedback(customer, order, merchant);
+        feedback.setComment(request.getComment());
+        feedback.setRating(request.getRating());
         if (request.getImgFiles() != null && !request.getImgFiles().isEmpty()) {
             feedback.setImgUrl(uploadReviewImage(request.getImgFiles()));
         }
@@ -78,25 +80,39 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public FeedbackResponse replyFeedback(ReplyFeedbackRequest request) {
+    public List<FeedbackResponse> getAllFeedbacksForCustomer(Long merchantId) {
+        Merchant merchant = merchantRepository.findById(merchantId)
+                .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
+
+        if (!merchant.isOpen())
+            throw new AppException(ErrorCode.MERCHANT_CLOSED);
+
+        return feedbackRepository.findAllByMerchantId(merchantId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public FeedbackResponse replyFeedback(Long id, ReplyFeedbackRequest request) {
+        Feedback customerFeedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
         User merchantAdmin = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        Merchant merchant = securityUtils.getCurrentMerchant();
 
-        // Check xem order đã ở trạng thái COMPLETED chưa
-        if (order.getStatus() != OrderStatus.COMPLETED)
-            throw new AppException(ErrorCode.ORDER_NOT_COMPLETED);
-
-        // Check lại xem order này có phải thuộc về merchant này không
-        if (!orderRepository.existsByIdAndMerchantId(order.getId(), merchant.getId()))
-            throw new AppException(ErrorCode.ORDER_NOT_OWNED_BY_CURRENT_MERCHANT);
-
-        Feedback feedback = buildReplyFeedback(merchantAdmin, order, request);
+        Feedback feedback = buildFeedback(merchantAdmin, customerFeedback.getOrder(), customerFeedback.getMerchant());
+        feedback.setComment(request.getComment());
         feedbackRepository.save(feedback);
 
         return mapper.toResponse(feedback);
+    }
+
+    @Override
+    public List<FeedbackResponse> getAllFeedbacksOfMyMerchant() {
+        return feedbackRepository.findAllByMerchantId(securityUtils.getCurrentMerchant().getId())
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     private List<String> uploadReviewImage(List<MultipartFile> imgFiles) {
@@ -107,21 +123,11 @@ public class FeedbackServiceImpl implements FeedbackService {
         return imgUrls;
     }
 
-    private Feedback buildGiveFeedback(User customer, Order order, Merchant merchant, GiveFeedbackRequest request) {
+    private Feedback buildFeedback(User customer, Order order, Merchant merchant) {
         return Feedback.builder()
                 .user(customer)
                 .order(order)
                 .merchant(merchant)
-                .rating(request.getRating())
-                .comment(request.getComment())
-                .build();
-    }
-
-    private Feedback buildReplyFeedback(User merchantAdmin, Order order, ReplyFeedbackRequest request) {
-        return Feedback.builder()
-                .user(merchantAdmin)
-                .order(order)
-                .comment(request.getComment())
                 .build();
     }
 }
