@@ -9,6 +9,7 @@ import java.util.List;
 public interface FeedbackService {
     // services for Customer
     void giveFeedback(GiveFeedbackRequest request);
+    List<FeedbackResponse> getAllFeedbacksForCustomer(Long merchantId);
 
     // services for Merchant Admin
     FeedbackResponse replyFeedback(Long id, ReplyFeedbackRequest request);

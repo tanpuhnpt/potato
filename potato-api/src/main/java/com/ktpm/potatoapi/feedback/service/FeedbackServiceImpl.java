@@ -80,6 +80,20 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
+    public List<FeedbackResponse> getAllFeedbacksForCustomer(Long merchantId) {
+        Merchant merchant = merchantRepository.findById(merchantId)
+                .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
+
+        if (!merchant.isOpen())
+            throw new AppException(ErrorCode.MERCHANT_CLOSED);
+
+        return feedbackRepository.findAllByMerchantId(merchantId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
     public FeedbackResponse replyFeedback(Long id, ReplyFeedbackRequest request) {
         Feedback customerFeedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));

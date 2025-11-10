@@ -28,6 +28,13 @@ public class FeedbackController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/merchants/{merchantId}/feedbacks")
+    @Operation(summary = "Show all feedbacks for Customer",
+            description = "API for Customer to retrieve a list of all feedbacks of a merchant")
+    public ResponseEntity<?> getAllFeedbacksForCustomer(@PathVariable Long merchantId) {
+        return ResponseEntity.ok(feedbackService.getAllFeedbacksForCustomer(merchantId));
+    }
+
     @PostMapping("/merchant/feedbacks/{id}/reply")
     @Operation(summary = "Reply a feedback",
             description = "API for Merchant Admin to reply a feedback to Customer")
