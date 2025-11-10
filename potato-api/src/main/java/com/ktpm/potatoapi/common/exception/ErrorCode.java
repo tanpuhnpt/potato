@@ -136,7 +136,7 @@ public enum ErrorCode {
 
     // FEEDBACK ERROR
     ORDER_NOT_OWNED_BY_CURRENT_USER(13001, "The order is not owned by this user", HttpStatus.BAD_REQUEST),
-    ORDER_NOT_OWNED_BY_CURRENT_MERCHANT(13002, "The order is not owned by this merchant", HttpStatus.BAD_REQUEST),
+    FEEDBACK_NOT_FOUND(13002, "Feedback not existed", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

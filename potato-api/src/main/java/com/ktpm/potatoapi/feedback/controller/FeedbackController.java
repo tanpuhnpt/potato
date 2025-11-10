@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,10 +28,10 @@ public class FeedbackController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/merchant/reply-feedback")
+    @PostMapping("/merchant/feedbacks/{id}/reply")
     @Operation(summary = "Reply a feedback",
             description = "API for Merchant Admin to reply a feedback to Customer")
-    public ResponseEntity<?> replyFeedBack(@RequestBody @Valid ReplyFeedbackRequest request) {
-        return ResponseEntity.ok(feedbackService.replyFeedback(request));
+    public ResponseEntity<?> replyFeedBack(@PathVariable Long id, @RequestBody ReplyFeedbackRequest request) {
+        return ResponseEntity.ok(feedbackService.replyFeedback(id, request));
     }
 }

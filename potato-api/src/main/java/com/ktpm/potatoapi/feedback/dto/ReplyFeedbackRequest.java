@@ -9,6 +9,5 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReplyFeedbackRequest {
-    Long orderId;
     String comment;
 }
