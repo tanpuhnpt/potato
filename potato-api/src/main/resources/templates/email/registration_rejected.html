@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Merchant Registration Review Result</title>
+    <title>Merchant Registration Rejection</title>
 </head>
 <body style="font-family: Arial, sans-serif; background-color: #f7f6f3; margin: 0; padding: 0;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding: 40px 0;">
@@ -27,33 +27,22 @@
                         </h2>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            Hello <strong><span th:text="${fullName}"></span></strong>,
+                            Dear <strong><span th:text="${fullName}"></span></strong>,
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            Your registration has been successfully approved in the Potato App system.
+                            Thank you for your interest in joining the Potato App system.
+                            After a careful review of your registration information, we regret to inform you that
+                            your request does not currently meet the conditions required to open a store on our system.
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            To complete the registration process, please make a bank transfer for the <strong>Merchant Registration Fee</strong> to the following account:
+                            We truly appreciate your time and effort in applying, and we encourage you to review your
+                            business information or reach out to us for more details regarding our requirements.
                         </p>
 
-                        <div style="background-color: #f8f6f2; border-left: 4px solid #d6b36a; padding: 15px; margin: 20px 0; border-radius: 5px;">
-                            <p style="color: #444444; font-size: 15px; line-height: 1.6; margin: 0;">
-                                <strong>Bank:</strong> Vietcombank<br/>
-                                <strong>Account Number:</strong> 0123456789<br/>
-                                <strong>Account Holder:</strong> Potato Company<br/>
-                                <strong>Amount:</strong> 1,200,000 VND<br/>
-                                <strong>Transfer Content:</strong> MERCHANT REGISTRATION FEE - <span th:text="${merchantName}"></span>
-                            </p>
-                        </div>
-
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            After completing the transfer, please upload your payment confirmation image via this link:
-                            <br/>
-                            <a href="http://localhost:8080/potato-api/merchant/upload-transaction-proof">
-                                http://localhost:8080/potato-api/merchant/upload-transaction-proof
-                            </a>
+                            You are always welcome to reapply once all the necessary conditions are met.
                         </p>
 
                         <br/>

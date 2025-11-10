@@ -10,9 +10,10 @@ public interface MerchantService {
     // services for merchant on-boarding
     List<MerchantRegistrationResponse> getAllRegisteredMerchants();
     MerchantRegistrationResponse registerMerchant(MerchantRegistrationRequest request);
-    MerchantRegistrationResponse confirmRegistration(Long id) throws MessagingException;
+    MerchantRegistrationResponse approveRegistration(Long id) throws MessagingException;
+    MerchantRegistrationResponse rejectRegistration(Long id) throws MessagingException;
     MerchantRegistrationResponse uploadTransactionImg(TransactionUploadRequest request);
-    MerchantRegistrationResponse approveMerchant(Long id) throws MessagingException;
+    MerchantRegistrationResponse activateMerchant(Long id) throws MessagingException;
 
     // services for SYSTEM ADMIN
     List<MerchantResponse> getAllMerchantsForSysAdmin();

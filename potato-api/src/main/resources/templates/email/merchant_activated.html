@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Account Approved</title>
+    <title>Merchant Activated</title>
 </head>
 <body style="font-family: Arial, sans-serif; background-color: #f7f6f3; margin: 0; padding: 0;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding: 40px 0;">
@@ -23,7 +23,7 @@
                 <tr>
                     <td style="padding: 30px;">
                         <h2 style="color: #333333; text-align: center; margin-bottom: 25px; font-size: 20px;">
-                            Admin Account Approved
+                            Merchant Activated
                         </h2>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
@@ -31,20 +31,24 @@
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            Your admin account has been successfully approved in the Potato App system.
+                            Your merchant has been successfully activated in the Potato App system.
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            <strong>Default Password:</strong>
-                            <span th:text="${password}" style="background-color: #f0f0f0; padding: 6px 10px; border-radius: 5px; font-weight: bold; display: inline-block; margin-top: 5px;"></span>
+                            Below are your login credentials:
+                        </p>
+
+                        <p style="color: #555555; font-size: 15px; line-height: 1.8; margin-left: 10px;">
+                            <strong>Email:</strong> <span th:text="${email}"></span><br/>
+                            <strong>Password:</strong> <span th:text="${password}"></span>
                         </p>
 
                         <p style="color: #555555; font-size: 15px; line-height: 1.6;">
-                            Please log in and change your password as soon as possible.
+                            Please update your password immediately for better security.
                         </p>
 
                         <br/>
-                        <p style="color: #444444; font-size: 15px; line-height: 1.6;">
+                        <p style="color: #555555; font-size: 15px; line-height: 1.6;">
                             Best regards,<br/>
                             <strong>Potato App Support Team</strong>
                         </p>

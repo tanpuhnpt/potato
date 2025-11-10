@@ -95,16 +95,36 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
-    public MerchantRegistrationResponse confirmRegistration(Long id) throws MessagingException {
+    @Transactional
+    public MerchantRegistrationResponse approveRegistration(Long id) throws MessagingException {
         RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
 
         if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.PENDING)
             throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_PENDING);
 
-        mailService.sendEmail(registeredMerchant.getEmail(), registeredMerchant.getFullName());
+        mailService.sendRegistrationApprovalEmail(registeredMerchant.getEmail(),
+                registeredMerchant.getFullName(), registeredMerchant.getMerchantName());
 
-        registeredMerchant.setRegistrationStatus(RegistrationStatus.CONFIRMED);
+        registeredMerchant.setRegistrationStatus(RegistrationStatus.APPROVED);
+        registeredMerchantRepository.save(registeredMerchant);
+
+        MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
+        response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
+        return response;
+    }
+
+    @Override
+    public MerchantRegistrationResponse rejectRegistration(Long id) throws MessagingException {
+        RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
+
+        if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.PENDING)
+            throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_PENDING);
+
+        mailService.sendRegistrationRejectionEmail(registeredMerchant.getEmail(), registeredMerchant.getFullName());
+
+        registeredMerchant.setRegistrationStatus(RegistrationStatus.REJECTED);
         registeredMerchantRepository.save(registeredMerchant);
 
         MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
@@ -128,12 +148,12 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     @Transactional
-    public MerchantRegistrationResponse approveMerchant(Long id) throws MessagingException {
+    public MerchantRegistrationResponse activateMerchant(Long id) throws MessagingException {
         RegisteredMerchant registeredMerchant = registeredMerchantRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTERED_MERCHANT_NOT_FOUND));
 
-        if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.CONFIRMED)
-            throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_CONFIRMED);
+        if (registeredMerchant.getRegistrationStatus() != RegistrationStatus.PAID)
+            throw new AppException(ErrorCode.REGISTERED_MERCHANT_STATUS_NOT_PAID);
 
         // tạo account cho merchant admin
         String rawPassword = "12345678"; // default password
@@ -147,7 +167,7 @@ public class MerchantServiceImpl implements MerchantService {
         log.info("Created merchant admin with mail: {}", registeredMerchant.getEmail());
 
         // cập nhật trạng thái đăng kí kinh doanh
-        registeredMerchant.setRegistrationStatus(RegistrationStatus.APPROVED);
+        registeredMerchant.setRegistrationStatus(RegistrationStatus.COMPLETED);
 
         // tạo merchant và gán merchant admin đã tạo
         Merchant merchant = Merchant.builder()
@@ -158,8 +178,8 @@ public class MerchantServiceImpl implements MerchantService {
                 .build();
         merchantRepository.save(merchant);
 
-        // gửi mail phê duyệt
-        mailService.sendApprovalEmail(registeredMerchant.getEmail(), merchant.getName(), rawPassword);
+        // gửi mail kích hoạt
+        mailService.sendMerchantActivationEmail(registeredMerchant.getEmail(), merchant.getName(), rawPassword);
 
         log.info("Approve and Created merchant {}", merchant.getName());
 
@@ -268,7 +288,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantResponse getMerchantForCustomer(Long id) {
-        Merchant merchant = merchantRepository.findById(id)
+        Merchant merchant = merchantRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
 
         if (!merchant.isOpen())
