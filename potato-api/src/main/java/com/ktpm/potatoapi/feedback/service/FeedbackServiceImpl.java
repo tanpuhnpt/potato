@@ -93,6 +93,14 @@ public class FeedbackServiceImpl implements FeedbackService {
         return mapper.toResponse(feedback);
     }
 
+    @Override
+    public List<FeedbackResponse> getAllFeedbacksOfMyMerchant() {
+        return feedbackRepository.findAllByMerchantId(securityUtils.getCurrentMerchant().getId())
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
     private List<String> uploadReviewImage(List<MultipartFile> imgFiles) {
         List<String> imgUrls = new ArrayList<>();
         for (MultipartFile file : imgFiles)

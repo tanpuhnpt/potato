@@ -34,4 +34,11 @@ public class FeedbackController {
     public ResponseEntity<?> replyFeedBack(@PathVariable Long id, @RequestBody ReplyFeedbackRequest request) {
         return ResponseEntity.ok(feedbackService.replyFeedback(id, request));
     }
+
+    @GetMapping("/merchant/feedbacks")
+    @Operation(summary = "Show all feedbacks for Merchant Admin",
+            description = "API for Merchant Admin to retrieve a list of all feedbacks")
+    public ResponseEntity<?> getAllFeedbacksOfMyMerchant() {
+        return ResponseEntity.ok(feedbackService.getAllFeedbacksOfMyMerchant());
+    }
 }
