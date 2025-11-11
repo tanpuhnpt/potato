@@ -17,6 +17,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 @Tag(name = "Revenue APIs", description = "APIs for revenue")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@CrossOrigin("*")
 public class RevenueController {
     RevenueService revenueService;
 

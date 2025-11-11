@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Tag(name = "Cuisine Type APIs", description = "APIs for cuisine type")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@CrossOrigin("*")
 public class CuisineTypeController {
     CuisineTypeService cuisineTypeService;
 
