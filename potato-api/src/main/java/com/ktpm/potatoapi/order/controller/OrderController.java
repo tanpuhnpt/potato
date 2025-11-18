@@ -55,11 +55,18 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderDetail(orderId));
     }
 
-    @PatchMapping("/merchant/order/{orderId}")
+    @PatchMapping("/merchant/orders/{orderId}")
     @Operation(summary = "Update status of an order",
             description = "API for Merchant Admin to update status of an order")
     public ResponseEntity<?> updateStatusOfOrder(@PathVariable Long orderId,
                                                  @RequestBody @Valid OrderStatusUpdateRequest request) {
         return ResponseEntity.ok(orderService.updateStatusOrder(orderId, request));
+    }
+
+    @PatchMapping("/orders/{orderId}/confirm")
+    @Operation(summary = "Update status of an order",
+            description = "API for Merchant Admin to update status of an order")
+    public ResponseEntity<?> confirmOrderCompleted(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.confirmOrderCompleted(orderId));
     }
 }
