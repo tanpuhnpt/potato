@@ -24,7 +24,7 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentResponse createPayment(HttpServletRequest httpServletRequest, PaymentRequest paymentRequest) {
         long amount = paymentRequest.getAmount() * 100L;
 
-        Map<String, String> params = vnPayConfig.getVNPayConfig();
+        Map<String, String> params = vnPayConfig.getVNPayConfig(httpServletRequest);
         params.put("vnp_Amount", String.valueOf(amount));
 
         // build query url
