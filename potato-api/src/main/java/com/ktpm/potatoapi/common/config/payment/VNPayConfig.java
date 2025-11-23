@@ -1,6 +1,7 @@
 package com.ktpm.potatoapi.common.config.payment;
 
 import com.ktpm.potatoapi.common.utils.VNPayUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
@@ -32,7 +33,7 @@ public class VNPayConfig {
 
     final String transactionReference = VNPayUtils.getRandomNumber(8);
 
-    public Map<String, String> getVNPayConfig() {
+    public Map<String, String> getVNPayConfig(HttpServletRequest request) {
         Map<String, String> vnpParams = new HashMap<>();
 
         // set up transaction data
@@ -42,7 +43,7 @@ public class VNPayConfig {
         vnpParams.put("vnp_OrderType", "other");
         vnpParams.put("vnp_Locale", "vn");
         vnpParams.put("vnp_BankCode", "NCB");
-        vnpParams.put("vnp_IpAddr", "127.0.0.1");
+        vnpParams.put("vnp_IpAddr", getClientIp(request));
         vnpParams.put("vnp_TmnCode", this.terminalCode);
         vnpParams.put("vnp_ReturnUrl", this.returnUrl);
         vnpParams.put("vnp_TxnRef", transactionReference);
@@ -62,4 +63,24 @@ public class VNPayConfig {
 
         return vnpParams;
     }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        // Trường hợp nhiều IP (qua proxy, load balancer)
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        System.out.println(ip);
+        return ip;
+    }
+
 }
