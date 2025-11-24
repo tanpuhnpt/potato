@@ -65,12 +65,29 @@ public class DroneServiceImpl implements DroneService {
         if (order != null) {
             Merchant merchant = order.getMerchant();
 
+            // drone arrive at merchant
             if (Double.compare(latitude, merchant.getLatitude()) == 0 &&
                     Double.compare(longitude, merchant.getLongitude()) == 0) {
 
                 drone.setStatus(DroneStatus.DELIVERING);
                 order.setStatus(OrderStatus.DELIVERING);
                 orderRepository.save(order);
+            }
+
+            // drone arrive at delivery address
+            if (Double.compare(latitude, order.getLatitude()) == 0 &&
+                    Double.compare(longitude, order.getLongitude()) == 0) {
+
+                drone.setStatus(DroneStatus.RETURNING);
+                order.setStatus(OrderStatus.COMPLETED);
+                orderRepository.save(order);
+            }
+
+            // drone arrive at station
+            if (Double.compare(latitude, order.getLatitude()) == 0 &&
+                    Double.compare(longitude, order.getLongitude()) == 0) {
+
+                drone.setStatus(DroneStatus.AVAILABLE);
             }
         }
 
