@@ -26,6 +26,8 @@ public class RegisteredMerchant {
     String merchantName;
 
     String address;
+    double latitude;
+    double longitude;
     String imgUrl;
 
     @Enumerated(EnumType.STRING)

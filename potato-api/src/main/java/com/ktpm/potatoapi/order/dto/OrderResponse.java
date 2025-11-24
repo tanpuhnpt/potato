@@ -1,5 +1,6 @@
 package com.ktpm.potatoapi.order.dto;
 
+import com.ktpm.potatoapi.drone.dto.DroneResponse;
 import com.ktpm.potatoapi.feedback.dto.FeedbackResponse;
 import com.ktpm.potatoapi.order.entity.OrderStatus;
 import lombok.*;
@@ -20,6 +21,8 @@ public class OrderResponse {
     String phone;
     String note;
     String deliveryAddress;
+    double latitude;
+    double longitude;
     Long deliveryFee;
     Long totalAmount;
     String cancelReason;
@@ -28,4 +31,5 @@ public class OrderResponse {
     LocalDateTime updatedAt;
     List<OrderItemResponse> orderItems;
     List<FeedbackResponse> feedbacks;
+    DroneResponse drone;
 }

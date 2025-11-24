@@ -2,6 +2,7 @@ package com.ktpm.potatoapi.order.entity;
 
 import com.ktpm.potatoapi.common.utils.OrderCodeUtils;
 import com.ktpm.potatoapi.common.utils.PhoneUtils;
+import com.ktpm.potatoapi.drone.entity.Drone;
 import com.ktpm.potatoapi.feedback.entity.Feedback;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.user.entity.User;
@@ -31,11 +32,16 @@ public class Order {
     @ManyToOne
     Merchant merchant;
 
+    @ManyToOne
+    Drone drone;
+
     String code;
     String fullName;
     String phone;
     String note;
     String deliveryAddress;
+    double latitude;
+    double longitude;
     Long deliveryFee;
     Long totalAmount;
     String cancelReason;

@@ -9,14 +9,14 @@ import java.util.Set;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MerchantResponse {
     Long id;
     String name;
     String introduction;
     String address;
+    double latitude;
+    double longitude;
     Map<String, String> openingHours;
     BigDecimal avgRating;
     int ratingCount;

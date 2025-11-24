@@ -10,9 +10,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum OrderStatus {
     CONFIRMED (0),      // Khách vừa tạo đơn
+    READY(1),
     CANCELED (1),       // Merchant hủy
-    DELIVERING (1),     // Chuẩn bị xong món và giao đơn cho tài xế nội bộ
-    COMPLETED (2),      // Đơn giao tới khách hàng thành công
+    DELIVERING (2),     // Chuẩn bị xong món và giao đơn cho drone
+    COMPLETED (3),      // Đơn giao tới khách hàng thành công
     ;
     Integer level;
 }

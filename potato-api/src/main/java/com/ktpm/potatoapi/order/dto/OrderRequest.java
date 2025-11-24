@@ -3,6 +3,7 @@ package com.ktpm.potatoapi.order.dto;
 import com.ktpm.potatoapi.cart.dto.CartItemRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,8 +21,14 @@ public class OrderRequest {
     @NotBlank(message = "ORDER_PHONE_BLANK")
     String phone;
 
-    @NotBlank(message = "ORDER_DELIVERY_ADDRESS")
+    @NotBlank(message = "ADDRESS_BLANK")
     String deliveryAddress;
+
+    @NotNull(message = "LATITUDE_NULL")
+    double latitude;
+
+    @NotNull(message = "LONGITUDE_NULL")
+    double longitude;
 
     String note;
 

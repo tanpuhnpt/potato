@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +67,7 @@ public class MerchantServiceImpl implements MerchantService {
     public MerchantRegistrationResponse registerMerchant(MerchantRegistrationRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             log.error("User already exists with email: {}", request.getEmail());
-            throw new AppException(ErrorCode.USER_EXISTED);
+            throw new AppException(ErrorCode.REGISTERED_MERCHANT_ADMIN_EXISTED);
         }
         if (registeredMerchantRepository.existsByMerchantName(request.getMerchantName())) {
             log.error("This merchant name ({}) is already registered", request.getMerchantName());
@@ -82,16 +81,12 @@ public class MerchantServiceImpl implements MerchantService {
         RegisteredMerchant registeredMerchant = registeredMerchantMapper.toEntity(request);
         registeredMerchant.setCuisineTypes(mapCuisineTypes(request.getCuisineTypes()));
 
-        try {
-            registeredMerchantRepository.save(registeredMerchant);
-            log.info("{} registered merchant {}", request.getEmail(), registeredMerchant.getMerchantName());
+        registeredMerchantRepository.save(registeredMerchant);
+        log.info("{} registered merchant {}", request.getEmail(), registeredMerchant.getMerchantName());
 
-            MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
-            response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
-            return response;
-        } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.MERCHANT_EXISTED);
-        }
+        MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
+        response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
+        return response;
     }
 
     @Override
@@ -170,12 +165,8 @@ public class MerchantServiceImpl implements MerchantService {
         registeredMerchant.setRegistrationStatus(RegistrationStatus.COMPLETED);
 
         // tạo merchant và gán merchant admin đã tạo
-        Merchant merchant = Merchant.builder()
-                .name(registeredMerchant.getMerchantName())
-                .address(registeredMerchant.getAddress())
-                .cuisineTypes(new HashSet<>(registeredMerchant.getCuisineTypes()))
-                .merchantAdmin(merchantAdmin)
-                .build();
+        Merchant merchant = merchantMapper.toMerchant(registeredMerchant);
+        merchant.setMerchantAdmin(merchantAdmin);
         merchantRepository.save(merchant);
 
         // gửi mail kích hoạt
