@@ -2,6 +2,7 @@ package com.ktpm.potatoapi.order.repo;
 
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.order.entity.Order;
+import com.ktpm.potatoapi.order.entity.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +27,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         AND o.status = 'COMPLETED' or o.status = 'CANCELED'
     """)
     List<Order> getOrderHistoryByCustomer(@Param("customerId") Long customerId);
+
+    Order findByDroneIdAndStatus(Long droneId, OrderStatus ready);
 }

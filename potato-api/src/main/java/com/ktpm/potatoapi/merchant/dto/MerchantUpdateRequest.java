@@ -2,6 +2,7 @@ package com.ktpm.potatoapi.merchant.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,9 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MerchantUpdateRequest {
     @NotBlank(message = "INTRO_BLANK")
@@ -19,6 +17,12 @@ public class MerchantUpdateRequest {
 
     @NotBlank(message = "ADDRESS_BLANK")
     String address;
+
+    @NotNull(message = "LATITUDE_NULL")
+    double latitude;
+
+    @NotNull(message = "LONGITUDE_NULL")
+    double longitude;
 
     @NotEmpty(message = "OPENING_HOURS_EMPTY")
     Map<String, String> openingHours;

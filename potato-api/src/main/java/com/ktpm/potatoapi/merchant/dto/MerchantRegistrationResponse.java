@@ -8,8 +8,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MerchantRegistrationResponse {
     Long id;
@@ -17,6 +15,8 @@ public class MerchantRegistrationResponse {
     String email;
     String merchantName;
     String address;
+    double latitude;
+    double longitude;
     Set<String> cuisineTypes;
     RegistrationStatus registrationStatus;
     String imgUrl;

@@ -4,6 +4,11 @@ import com.ktpm.potatoapi.cart.dto.CartItemRequest;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
 import com.ktpm.potatoapi.common.utils.SecurityUtils;
+import com.ktpm.potatoapi.drone.entity.Drone;
+import com.ktpm.potatoapi.drone.entity.DroneStation;
+import com.ktpm.potatoapi.drone.entity.DroneStatus;
+import com.ktpm.potatoapi.drone.repo.DroneRepository;
+import com.ktpm.potatoapi.drone.repo.DroneStationRepository;
 import com.ktpm.potatoapi.menu.entity.MenuItem;
 import com.ktpm.potatoapi.menu.repo.MenuItemRepository;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
@@ -30,10 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +52,8 @@ public class OrderServiceImpl implements OrderService {
     OrderItemOptionValueRepository orderItemOptionValueRepository;
     OrderItemMapper orderItemMapper;
     OrderItemOptionValueMapper orderItemOptionValueMapper;
+    DroneRepository droneRepository;
+    DroneStationRepository droneStationRepository;
 
     @Override
     @Transactional
@@ -168,17 +172,17 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.ORDER_STATUS_NOT_STEP_BY_STEP);
 
         // handle case: cancel order
-        if (newStatus == OrderStatus.CANCELED) {
-            if((request.getCancelReason() == null) || (request.getCancelReason().isBlank()))
-                throw new AppException(ErrorCode.CANCEL_REASON_EMPTY);
+        if (newStatus == OrderStatus.CANCELED)
+            handleCancelOrder(order, request);
 
-            order.setCancelReason(request.getCancelReason());
-        }
+        // handle case: ready to pick up
+        if (newStatus == OrderStatus.READY)
+            assignDroneForOrder(order, merchant);
 
         order.setStatus(newStatus);
         orderRepository.save(order);
 
-        log.info("Updated {} status: {} successfully", order.getId(), newStatus);
+        log.info("Updated order {} status: {} successfully", order.getId(), newStatus);
 
         List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
         OrderResponse orderResponse = orderMapper.toResponse(order);
@@ -295,5 +299,116 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return orderItemResponses;
+    }
+
+    private void handleCancelOrder(Order order, OrderStatusUpdateRequest request) {
+        String reason = request.getCancelReason();
+        if (reason == null || reason.isBlank())
+            throw new AppException(ErrorCode.CANCEL_REASON_EMPTY);
+        order.setCancelReason(reason);
+    }
+
+    private void assignDroneForOrder(Order order, Merchant merchant) {
+        double merchantLat = merchant.getLatitude();
+        double merchantLng = merchant.getLongitude();
+        double customerLat = order.getLatitude();
+        double customerLng = order.getLongitude();
+        double batteryConsumptionPerKm = 1.5;
+
+        // lấy tất cả trạm và xếp tăng dần theo khoảng cách từ trạm đến cửa hàng
+        List<DroneStation> stations = droneStationRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparingDouble(station ->
+                        distanceInKm(merchantLat, merchantLng, station.getLatitude(), station.getLongitude()))
+                )
+                .toList();
+
+        // các bước chọn drone để giao đơn
+        Drone chosenDrone = findSuitableDrone(
+                stations, merchantLat, merchantLng, customerLat, customerLng, batteryConsumptionPerKm);
+
+        // nếu không tìm được drone đủ pin ở tất cả trạm
+        if (chosenDrone == null)
+            throw new AppException(ErrorCode.NO_DRONE_WITH_ENOUGH_BATTERY);
+
+        // cập nhật drone
+        chosenDrone.setStatus(DroneStatus.TO_PICKUP);
+        droneRepository.save(chosenDrone);
+
+        order.setDrone(chosenDrone);
+
+        log.info("Assigned drone {} to order {}", chosenDrone.getId(), order.getId());
+    }
+
+    private double distanceInKm(double startLat, double startLng, double endLat, double endLng) {
+        int R = 6371; // Earth's radius in km
+        double dLat = Math.toRadians(endLat - startLat);
+        double dLng = Math.toRadians(endLng - startLng);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(startLat)) * Math.cos(Math.toRadians(endLat))
+                * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    private Drone findSuitableDrone(
+            List<DroneStation> stations,
+            double merchantLat, double merchantLng,
+            double customerLat, double customerLng,
+            double batteryConsumptionPerKm
+    ) {
+        for (DroneStation station : stations) {
+            List<Drone> availableDrones = droneRepository
+                    .findAllByStationIdAndStatus(station.getId(), DroneStatus.AVAILABLE);
+
+            // nếu trạm không có drone nào available thì tìm trạm kế tiếp
+            if (availableDrones.isEmpty()) continue;
+
+            // tính lượng pin cần thiết
+            double requiredBattery = calculateRequiredBattery(
+                    station, merchantLat, merchantLng, customerLat, customerLng, batteryConsumptionPerKm);
+            log.info("requiredBattery: " + requiredBattery);
+
+            // tìm drone đủ pin
+            List<Drone> dronesEnoughBattery = availableDrones
+                    .stream()
+                    .filter(d -> d.getBattery() >= requiredBattery)
+                    .toList();
+
+            // nếu trạm không có drone nào đủ pin thì tìm trạm kế tiếp
+            if (dronesEnoughBattery.isEmpty()) continue;
+
+            // chọn drone có lượng pin gần nhất với lượng pin cần thiết
+            return dronesEnoughBattery
+                    .stream()
+                    .min(Comparator.comparingDouble(d -> d.getBattery() - requiredBattery))
+                    .get();
+
+        }
+        return null;
+    }
+
+    private double calculateRequiredBattery(
+            DroneStation station,
+            double merchantLat, double merchantLng,
+            double customerLat, double customerLng,
+            double consumptionPerKm
+    ) {
+        double stationToMerchant = distanceInKm(
+                station.getLatitude(), station.getLongitude(), merchantLat, merchantLng);
+        System.out.println("stationToMerchant: " + stationToMerchant);
+
+        double merchantToCustomer = distanceInKm(
+                merchantLat, merchantLng, customerLat, customerLng);
+        System.out.println("merchantToCustomer: " + merchantToCustomer);
+
+        double customerToStation = distanceInKm(
+                customerLat, customerLng, station.getLatitude(), station.getLongitude());
+        System.out.println("customerToStation: " + customerToStation);
+
+        double totalDistance = stationToMerchant + merchantToCustomer + customerToStation;
+        System.out.println("totalDistance: " + totalDistance);
+
+        return totalDistance * consumptionPerKm;
     }
 }

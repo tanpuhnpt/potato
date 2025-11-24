@@ -15,9 +15,6 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Merchant {
     @Id
@@ -29,6 +26,8 @@ public class Merchant {
 
     String introduction;
     String address;
+    double latitude;
+    double longitude;
 
     @JdbcTypeCode(SqlTypes.JSON) // map JSON từ db sang entity.
     @Column(columnDefinition = "json")
