@@ -50,7 +50,7 @@ public class VNPayConfig {
         vnpParams.put("vnp_OrderInfo", "Thanh toan don hang: " + transactionReference);
 
         // set up transaction time
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 
         String vnpCreateDate = formatter.format(calendar.getTime());
