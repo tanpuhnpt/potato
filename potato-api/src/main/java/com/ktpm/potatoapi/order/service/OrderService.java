@@ -11,6 +11,7 @@ public interface OrderService {
     OrderResponse createOrder(OrderRequest cartOrderRequest);
     List<OrderResponse> getAllOrdersInProgress();
     List<OrderResponse> getOrderHistory();
+    OrderResponse confirmOrderCompleted(Long orderId);
 
     // mutual service
     OrderResponse getOrderDetail(Long orderId);
