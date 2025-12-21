@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Merchant Registration Rejection</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f7f6f3; margin: 0; padding: 0;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding: 40px 0;">
+    <tr>
+        <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.08);">
+
+                <!-- HEADER -->
+                <tr>
+                    <td style="background-color: #d6b36a; padding: 20px; text-align: center;">
+                        <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: bold;">
+                            🥔 Potato App
+                        </h1>
+                    </td>
+                </tr>
+
+                <!-- CONTENT -->
+                <tr>
+                    <td style="padding: 30px;">
+                        <h2 style="color: #333333; text-align: center; margin-bottom: 25px; font-size: 20px;">
+                            Merchant Registration Review Result
+                        </h2>
+
+                        <p style="color: #555555; font-size: 15px; line-height: 1.6;">
+                            Dear <strong><span th:text="${fullName}"></span></strong>,
+                        </p>
+
+                        <p style="color: #555555; font-size: 15px; line-height: 1.6;">
+                            Thank you for your interest in joining the Potato App system.
+                            After a careful review of your registration information, we regret to inform you that
+                            your request does not currently meet the conditions required to open a store on our system.
+                        </p>
+
+                        <p style="color: #555555; font-size: 15px; line-height: 1.6;">
+                            We truly appreciate your time and effort in applying, and we encourage you to review your
+                            business information or reach out to us for more details regarding our requirements.
+                        </p>
+
+                        <p style="color: #555555; font-size: 15px; line-height: 1.6;">
+                            You are always welcome to reapply once all the necessary conditions are met.
+                        </p>
+
+                        <br/>
+                        <p style="color: #444444; font-size: 15px; line-height: 1.6;">
+                            Best regards,<br/>
+                            <strong>Potato App Support Team</strong>
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- FOOTER -->
+                <tr>
+                    <td style="background-color: #faf7f2; padding: 15px; text-align: center; font-size: 12px; color: #777777;">
+                        © 2025 Potato App. All rights reserved.
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

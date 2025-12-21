@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /potato-api
+
+spring:
+  application:
+    name: potato-api
+  datasource:
+    url: ${SQL_URL:jdbc:mysql://127.0.0.1:3307/potato_api?serverTimezone=UTC}
+    username: root
+    password: ${SQL_PASSWORD:171104}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "potatoapp.adm1n@gmail.com"
+    password: "usvidloymphbjdci"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+cloudinary:
+  cloud_name: "dcudlkqcm"
+  api_key: "734251979716821"
+  api_secret: "WHzx_91QpnZwhLi0DOrxJGMJDT4"
+
+app:
+  server-url: ${APP_SERVER_URL:http://localhost:8080}
+
+vnpay:
+  url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  returnUrl: "http://localhost:8080/potato-api/payment/call-back"
+  tmnCode: L0SFF0BY
+  secretKey: IW1J6E4EK1E3NEF1GUIXUUMUFVLRLWYO
