@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/potato-api/payment/call-back",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/potato-api/:path*",
+      "destination": "/api/proxy"
+    }
+  ]
+}

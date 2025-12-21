@@ -1,10 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 *{
   padding: 0;
   margin: 0;
   box-sizing: border-box;
   font-family: 'Montserrat', cursive;
+}
+
+html{
+  scroll-behavior: smooth;
 }
 body{
   min-height: 100vh;
@@ -14,8 +18,23 @@ a{
   color: inherit;
 }
 .app{
-  width: 80%;
-  margin: auto;
+  width: min(1200px, 80%);
+  margin: 0 auto 80px;
+  padding: 0 12px;
+}
+@media (max-width: 1200px){
+  .app{ width: 90%; }
+}
+@media (max-width: 900px){
+  body{ background: #fff; }
+  .app{
+    width: 100%;
+    margin-bottom: 48px;
+    padding: 0 18px;
+  }
+}
+@media (max-width: 600px){
+  .app{ padding: 0 12px; }
 }
 @keyframes fadeIn{
   0%{
