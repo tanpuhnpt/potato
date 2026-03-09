@@ -18,13 +18,13 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
         SELECT m
         FROM Merchant m
         WHERE (:name IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :name, '%')))
-        AND (:active IS NULL OR m.isActive = :active)
-        AND (:open IS NULL OR m.isOpen = :open)
+        AND (:isActive IS NULL OR m.isActive = :isActive)
+        AND (:isOpen IS NULL OR m.isOpen = :isOpen)
     """)
     Page<Merchant> findAllMerchants(
             @Param("name") String name,
-            @Param("active") Boolean active,
-            @Param("open") Boolean open,
+            @Param("isActive") Boolean isActive,
+            @Param("isOpen") Boolean isOpen,
             Pageable pageable
     );
 }

@@ -54,7 +54,7 @@ public class MerchantServiceImpl implements MerchantService {
     SecurityUtils securityUtils;
 
     @Override
-    public PageResponse<MerchantRegistrationResponse> getRegisteredMerchantsByStatus(int page, int size, RegistrationStatus status) {
+    public PageResponse<MerchantRegistrationResponse> getRegisteredMerchantsByStatus(RegistrationStatus status, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         Page<MerchantRegistrationResponse> responsePage = registeredMerchantRepository

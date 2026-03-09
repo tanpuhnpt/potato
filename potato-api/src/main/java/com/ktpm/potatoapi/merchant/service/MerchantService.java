@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface MerchantService {
     // services for merchant on-boarding
-    PageResponse<MerchantRegistrationResponse> getRegisteredMerchantsByStatus(int page, int size, RegistrationStatus status);
+    PageResponse<MerchantRegistrationResponse> getRegisteredMerchantsByStatus(RegistrationStatus status, int page, int size);
     MerchantRegistrationResponse registerMerchant(MerchantRegistrationRequest request);
     MerchantRegistrationResponse approveRegistration(Long id) throws MessagingException;
     MerchantRegistrationResponse rejectRegistration(Long id) throws MessagingException;

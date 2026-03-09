@@ -31,11 +31,11 @@ public class MerchantController {
     @Operation(summary = "Show registered merchants in system by status",
             description = "API for System Admin to retrieve a list of registered merchants by status")
     public ResponseEntity<?> getRegisteredMerchantsByStatus(
+            @RequestParam(required = false) RegistrationStatus status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            RegistrationStatus status
+            @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(merchantService.getRegisteredMerchantsByStatus(page, size, status));
+        return ResponseEntity.ok(merchantService.getRegisteredMerchantsByStatus(status, page, size));
     }
 
     @PostMapping("/merchant/register")

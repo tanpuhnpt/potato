@@ -1,6 +1,5 @@
 package com.ktpm.potatoapi.order.repo;
 
-import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.order.entity.Order;
 import com.ktpm.potatoapi.order.entity.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -12,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findAllByMerchant(Merchant merchant);
+    Page<Order> findAllByMerchantIdAndStatus(Long merchantId, OrderStatus status, Pageable pageable);
     boolean existsByIdAndCustomerId(Long id, Long customerId);
 
     @Query(value = """
@@ -20,7 +19,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         WHERE o.customer.id = :customerId
         AND o.status = 'CONFIRMED' or o.status = 'DELIVERING'
     """)
-    List<Order> getOrderInProgressByCustomer(@Param("customerId") Long customerId);
+    List<Order> getAllOrdersInProgressByCustomer(@Param("customerId") Long customerId);
 
     @Query(value = """
         FROM Order o

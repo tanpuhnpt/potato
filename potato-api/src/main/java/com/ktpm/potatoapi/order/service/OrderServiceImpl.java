@@ -94,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         List<OrderResponse> orderResponses = new ArrayList<>();
-        List<Order> orders = orderRepository.getOrderInProgressByCustomer(customer.getId());
+        List<Order> orders = orderRepository.getAllOrdersInProgressByCustomer(customer.getId());
         for(Order order : orders) {
             List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
             OrderResponse orderResponse = orderMapper.toResponse(order);
@@ -157,20 +157,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponse> getAllOrdersOfMyMerchant() {
-        Merchant merchant = securityUtils.getCurrentMerchant();
-        return orderRepository.findAllByMerchant(merchant)
-                .stream()
-                .map(order -> {
-                    List<OrderItemResponse> orderItemResponses =
-                            mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
+    public PageResponse<OrderResponse> getOrdersOfMyMerchantByStatus(OrderStatus status, int page, int size) {
+        Long merchantId = securityUtils.getCurrentMerchant().getId();
 
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<OrderResponse> responsePage = orderRepository
+                .findAllByMerchantIdAndStatus(merchantId, status, pageable)
+                .map(order -> {
+                    List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
                     OrderResponse orderResponse = orderMapper.toResponse(order);
                     orderResponse.setOrderItems(orderItemResponses);
-
                     return orderResponse;
-                })
-                .toList();
+                });
+        return PageResponse.from(responsePage);
     }
 
     @Override
