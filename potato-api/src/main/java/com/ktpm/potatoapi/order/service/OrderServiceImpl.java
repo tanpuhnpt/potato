@@ -3,6 +3,7 @@ package com.ktpm.potatoapi.order.service;
 import com.ktpm.potatoapi.cart.dto.CartItemRequest;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
+import com.ktpm.potatoapi.common.pagination.PageResponse;
 import com.ktpm.potatoapi.common.utils.SecurityUtils;
 import com.ktpm.potatoapi.drone.entity.Drone;
 import com.ktpm.potatoapi.drone.entity.DroneStation;
@@ -32,6 +33,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,19 +105,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponse> getOrderHistory() {
+    public PageResponse<OrderResponse> getOrderHistory(int page, int size) {
         User customer = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        List<OrderResponse> orderResponses = new ArrayList<>();
-        List<Order> orders = orderRepository.getOrderHistoryByCustomer(customer.getId());
-        for(Order order : orders) {
-            List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
-            OrderResponse orderResponse = orderMapper.toResponse(order);
-            orderResponse.setOrderItems(orderItemResponses);
-            orderResponses.add(orderResponse);
-        }
-        return orderResponses;
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<OrderResponse> responsePage = orderRepository
+                .getOrderHistoryByCustomer(customer.getId(), pageable)
+                .map(order -> {
+                    List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
+                    OrderResponse response = orderMapper.toResponse(order);
+                    response.setOrderItems(orderItemResponses);
+                    return response;
+                });
+
+        return PageResponse.from(responsePage);
     }
 
     @Override
@@ -166,7 +174,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResponse updateStatusOrder(Long orderId, OrderStatusUpdateRequest request) {
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatusUpdateRequest request) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 

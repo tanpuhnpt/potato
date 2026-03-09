@@ -3,6 +3,7 @@ package com.ktpm.potatoapi.merchant.controller;
 import com.ktpm.potatoapi.merchant.dto.MerchantRegistrationRequest;
 import com.ktpm.potatoapi.merchant.dto.MerchantUpdateRequest;
 import com.ktpm.potatoapi.merchant.dto.TransactionUploadRequest;
+import com.ktpm.potatoapi.merchant.entity.RegistrationStatus;
 import com.ktpm.potatoapi.merchant.service.MerchantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,10 +28,14 @@ public class MerchantController {
     MerchantService merchantService;
 
     @GetMapping("/admin/registered-merchants")
-    @Operation(summary = "Show all registered merchants in system",
-            description = "API for System Admin to retrieve a list of all registered merchants")
-    public ResponseEntity<?> getAllRegisteredMerchants() {
-        return ResponseEntity.ok(merchantService.getAllRegisteredMerchants());
+    @Operation(summary = "Show registered merchants in system by status",
+            description = "API for System Admin to retrieve a list of registered merchants by status")
+    public ResponseEntity<?> getRegisteredMerchantsByStatus(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            RegistrationStatus status
+    ) {
+        return ResponseEntity.ok(merchantService.getRegisteredMerchantsByStatus(page, size, status));
     }
 
     @PostMapping("/merchant/register")
@@ -71,8 +76,14 @@ public class MerchantController {
     @GetMapping("/admin/merchants")
     @Operation(summary = "Show all merchants for System Admin",
             description = "API for System Admin to retrieve a list of all merchants")
-    public ResponseEntity<?> getAllMerchantsForSysAdmin() {
-        return ResponseEntity.ok(merchantService.getAllMerchantsForSysAdmin());
+    public ResponseEntity<?> getAllMerchantsForSysAdmin(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Boolean isOpen,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(merchantService.getAllMerchantsForSysAdmin(name, isActive, isOpen, page, size));
     }
 
     @GetMapping("/admin/merchants/{id}")
@@ -119,8 +130,12 @@ public class MerchantController {
     @GetMapping("/merchants")
     @Operation(summary = "Show all merchants for Customer",
             description = "API for Customer to retrieve a list of all merchants which are active and open")
-    public ResponseEntity<?> getAllMerchantsForCustomer() {
-        return ResponseEntity.ok(merchantService.getAllMerchantsForCustomer());
+    public ResponseEntity<?> getAllMerchantsForCustomer(
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(merchantService.getAllMerchantsForCustomer(name, page, size));
     }
 
     @GetMapping("/merchants/{id}")
