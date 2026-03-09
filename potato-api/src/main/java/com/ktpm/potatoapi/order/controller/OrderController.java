@@ -2,6 +2,7 @@ package com.ktpm.potatoapi.order.controller;
 
 import com.ktpm.potatoapi.order.dto.OrderRequest;
 import com.ktpm.potatoapi.order.dto.OrderStatusUpdateRequest;
+import com.ktpm.potatoapi.order.entity.OrderStatus;
 import com.ktpm.potatoapi.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,10 +46,13 @@ public class OrderController {
     }
 
     @GetMapping("/merchant/my-orders")
-    @Operation(summary = "Show all orders of Merchant",
-            description = "API for Merchant Admin to retrieve a list of all orders from Customer")
-    public ResponseEntity<?> getAllOrdersOfMerchant() {
-        return ResponseEntity.ok(orderService.getAllOrdersOfMyMerchant());
+    @Operation(summary = "Show orders of Merchant by status",
+            description = "API for Merchant Admin to retrieve a list of orders by status")
+    public ResponseEntity<?> getOrdersByStatus(
+            @RequestParam OrderStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(orderService.getOrdersOfMyMerchantByStatus(status, page, size));
     }
 
     @GetMapping(path = {"/orders/{orderId}", "merchant/orders/{orderId}"})
@@ -67,8 +71,8 @@ public class OrderController {
     }
 
     @PatchMapping("/orders/{orderId}/confirm")
-    @Operation(summary = "Update status of an order",
-            description = "API for Merchant Admin to update status of an order")
+    @Operation(summary = "Confirm an order",
+            description = "API for Customer to confirm an order which is completed")
     public ResponseEntity<?> confirmOrderCompleted(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.confirmOrderCompleted(orderId));
     }
