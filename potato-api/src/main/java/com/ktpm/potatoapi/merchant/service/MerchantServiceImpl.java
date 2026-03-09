@@ -1,5 +1,6 @@
 package com.ktpm.potatoapi.merchant.service;
 
+import com.ktpm.potatoapi.common.pagination.PageResponse;
 import com.ktpm.potatoapi.merchant.dto.*;
 import com.ktpm.potatoapi.user.entity.Role;
 import com.ktpm.potatoapi.user.entity.User;
@@ -23,13 +24,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,17 +54,18 @@ public class MerchantServiceImpl implements MerchantService {
     SecurityUtils securityUtils;
 
     @Override
-    public List<MerchantRegistrationResponse> getAllRegisteredMerchants() {
-        List<RegisteredMerchant> registeredMerchants = registeredMerchantRepository.findAll();
-        log.info("Get all registered merchants");
-        return registeredMerchants
-                .stream()
+    public PageResponse<MerchantRegistrationResponse> getRegisteredMerchantsByStatus(int page, int size, RegistrationStatus status) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        Page<MerchantRegistrationResponse> responsePage = registeredMerchantRepository
+                .findByRegistrationStatus(status, pageable)
                 .map(registeredMerchant -> {
                     MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
                     response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
                     return response;
-                })
-                .toList();
+                });
+
+        return PageResponse.from(responsePage);
     }
 
     @Override
@@ -180,17 +185,19 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
-    public List<MerchantResponse> getAllMerchantsForSysAdmin() {
-        List<Merchant> merchants = merchantRepository.findAll();
-        log.info("Get all merchants for System Admin");
-        return merchants
-                .stream()
+    public PageResponse<MerchantResponse> getAllMerchantsForSysAdmin(
+            String name, Boolean isActive, Boolean isOpen, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        Page<MerchantResponse> responsePage = merchantRepository
+                .findAllMerchants(name, isActive, isOpen, pageable)
                 .map(merchant -> {
                     MerchantResponse merchantResponse = merchantMapper.toResponse(merchant);
                     merchantResponse.setCuisineTypes(mapCuisineTypeNames(merchant.getCuisineTypes()));
                     return merchantResponse;
-                })
-                .toList();
+                });
+
+        return PageResponse.from(responsePage);
     }
 
     @Override
@@ -264,17 +271,19 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
-    public List<MerchantResponse> getAllMerchantsForCustomer() {
-        List<Merchant> merchants = merchantRepository.findAllByIsOpenTrue();
-        log.info("Get all merchants for Customer");
-        return merchants
-                .stream()
+    public PageResponse<MerchantResponse> getAllMerchantsForCustomer(String name, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+
+        Page<MerchantResponse> responsePage = merchantRepository
+//                .findAllByIsOpenTrue(pageable)
+                .findAllMerchants(name, true, true, pageable)
                 .map(merchant -> {
                     MerchantResponse merchantResponse = merchantMapper.toResponse(merchant);
                     merchantResponse.setCuisineTypes(mapCuisineTypeNames(merchant.getCuisineTypes()));
                     return merchantResponse;
-                })
-                .toList();
+                });
+
+        return PageResponse.from(responsePage);
     }
 
     @Override

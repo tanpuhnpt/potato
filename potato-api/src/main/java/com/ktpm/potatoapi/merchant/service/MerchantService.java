@@ -1,14 +1,14 @@
 package com.ktpm.potatoapi.merchant.service;
 
+import com.ktpm.potatoapi.common.pagination.PageResponse;
 import com.ktpm.potatoapi.merchant.dto.*;
+import com.ktpm.potatoapi.merchant.entity.RegistrationStatus;
 import jakarta.mail.MessagingException;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 public interface MerchantService {
     // services for merchant on-boarding
-    List<MerchantRegistrationResponse> getAllRegisteredMerchants();
+    PageResponse<MerchantRegistrationResponse> getRegisteredMerchantsByStatus(int page, int size, RegistrationStatus status);
     MerchantRegistrationResponse registerMerchant(MerchantRegistrationRequest request);
     MerchantRegistrationResponse approveRegistration(Long id) throws MessagingException;
     MerchantRegistrationResponse rejectRegistration(Long id) throws MessagingException;
@@ -16,7 +16,7 @@ public interface MerchantService {
     MerchantRegistrationResponse activateMerchant(Long id) throws MessagingException;
 
     // services for SYSTEM ADMIN
-    List<MerchantResponse> getAllMerchantsForSysAdmin();
+    PageResponse<MerchantResponse> getAllMerchantsForSysAdmin(String name, Boolean isActive, Boolean isOpen, int page, int size);
     MerchantResponse getMerchantForSysAdmin(Long id);
     MerchantResponse updateMerchantActiveStatus(Long id, boolean isActive);
 
@@ -26,6 +26,6 @@ public interface MerchantService {
     MerchantResponse updateMyMerchantOpenStatus(boolean isOpen);
 
     // services for CUSTOMER
-    List<MerchantResponse> getAllMerchantsForCustomer();
+    PageResponse<MerchantResponse> getAllMerchantsForCustomer(String name, int page, int size);
     MerchantResponse getMerchantForCustomer(Long id);
 }
