@@ -37,8 +37,11 @@ public class OrderController {
     @GetMapping("/my-order-history")
     @Operation(summary = "Show order history for Customer",
             description = "API for Customer to retrieve a list of orders which are completed/canceled")
-    public ResponseEntity<?> getOrderHistory() {
-        return ResponseEntity.ok(orderService.getOrderHistory());
+    public ResponseEntity<?> getOrderHistory(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(orderService.getOrderHistory(page, size));
     }
 
     @GetMapping("/merchant/my-orders")
@@ -58,9 +61,9 @@ public class OrderController {
     @PatchMapping("/merchant/orders/{orderId}")
     @Operation(summary = "Update status of an order",
             description = "API for Merchant Admin to update status of an order")
-    public ResponseEntity<?> updateStatusOfOrder(@PathVariable Long orderId,
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Long orderId,
                                                  @RequestBody @Valid OrderStatusUpdateRequest request) {
-        return ResponseEntity.ok(orderService.updateStatusOrder(orderId, request));
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, request));
     }
 
     @PatchMapping("/orders/{orderId}/confirm")
