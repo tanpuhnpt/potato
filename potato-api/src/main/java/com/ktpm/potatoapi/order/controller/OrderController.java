@@ -28,14 +28,14 @@ public class OrderController {
         return ResponseEntity.ok(orderService.createOrder(orderRequest));
     }
 
-    @GetMapping("/my-orders")
+    @GetMapping("/orders/in-progress")
     @Operation(summary = "Show orders in progress",
             description = "API for Customer to retrieve a list of orders which are confirmed/delivering")
     public ResponseEntity<?> getAllOrdersInProgress() {
         return ResponseEntity.ok(orderService.getAllOrdersInProgress());
     }
 
-    @GetMapping("/my-order-history")
+    @GetMapping("/orders/history")
     @Operation(summary = "Show order history for Customer",
             description = "API for Customer to retrieve a list of orders which are completed/canceled")
     public ResponseEntity<?> getOrderHistory(
@@ -45,7 +45,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderHistory(page, size));
     }
 
-    @GetMapping("/merchant/my-orders")
+    @GetMapping("/merchant/orders")
     @Operation(summary = "Show orders of Merchant by status",
             description = "API for Merchant Admin to retrieve a list of orders by status")
     public ResponseEntity<?> getOrdersByStatus(
