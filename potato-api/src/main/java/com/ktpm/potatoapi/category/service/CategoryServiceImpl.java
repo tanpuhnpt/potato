@@ -12,6 +12,7 @@ import com.ktpm.potatoapi.menu.repo.MenuItemRepository;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.merchant.repo.MerchantRepository;
 import com.ktpm.potatoapi.option.repo.OptionRepository;
+import com.ktpm.potatoapi.redis.RedisService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -33,34 +35,50 @@ public class CategoryServiceImpl implements CategoryService {
     MerchantRepository merchantRepository;
     MenuItemRepository menuItemRepository;
     OptionRepository optionRepository;
+    RedisService redisService;
 
     @Override
     public List<CategoryResponse> getAllCategoriesOfMyMerchant() {
-        List<Category> categories = categoryRepository
-                .findAllByMerchantIdAndIsActiveTrue(merchantContextProvider.getCurrentMerchant().getId());
+        Long merchantId = merchantContextProvider.getCurrentMerchant().getId();
 
-        log.info("Get all categories for Merchant Admin");
+        String key = String.format("category:merchant:%d", merchantId);
+        List<CategoryResponse> categoryResponses = redisService.getAll(key, CategoryResponse.class);
 
-        return categories.stream()
-                .map(categoryMapper::toResponse)
-                .toList();
+        if (categoryResponses == null) {
+            log.info("query category");
+            categoryResponses = categoryRepository
+                    .findAllByMerchantIdAndIsActiveTrue(merchantId)
+                    .stream()
+                    .map(categoryMapper::toResponse)
+                    .toList();
+
+            redisService.saveAll(key, categoryResponses);
+        }
+
+        return categoryResponses;
     }
 
     @Override
     public List<CategoryResponse> getAllCategoriesForCustomer(Long merchantId) {
-        Merchant merchant = merchantRepository.findById(merchantId)
-                .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
+        String key = "category:merchant:" + merchantId;
+        List<CategoryResponse> categoryResponses = redisService.getAll(key, CategoryResponse.class);
 
-        if (!merchant.isOpen())
-            throw new AppException(ErrorCode.MERCHANT_CLOSED);
+        if (categoryResponses == null) {
+            Merchant merchant = merchantRepository.findById(merchantId)
+                    .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
 
-        List<Category> categories = categoryRepository.findAllByMerchantIdAndIsActiveTrue(merchantId);
+            if (!merchant.isOpen())
+                throw new AppException(ErrorCode.MERCHANT_CLOSED);
 
-        log.info("Get all categories for Customer");
+            categoryResponses = categoryRepository
+                    .findAllByMerchantIdAndIsActiveTrue(merchantId)
+                    .stream()
+                    .map(categoryMapper::toResponse)
+                    .toList();
 
-        return categories.stream()
-                .map(categoryMapper::toResponse)
-                .toList();
+            redisService.saveAll(key, categoryResponses);
+        }
+        return categoryResponses;
     }
 
     @Override
@@ -88,7 +106,7 @@ public class CategoryServiceImpl implements CategoryService {
         Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         // Check category must be owned of current merchant
-        if (!category.getMerchant().equals(merchant))
+        if(!Objects.equals(category.getMerchant().getId(), merchant.getId()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         category.setName(categoryRequest.getName());
@@ -112,7 +130,7 @@ public class CategoryServiceImpl implements CategoryService {
         Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         // Check category must be owned by current merchant
-        if (!category.getMerchant().equals(merchant))
+        if(!Objects.equals(category.getMerchant().getId(), merchant.getId()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         // xóa các liên kết của option và menu item thuộc cate này

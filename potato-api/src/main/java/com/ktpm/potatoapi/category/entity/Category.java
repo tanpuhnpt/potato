@@ -1,6 +1,7 @@
 package com.ktpm.potatoapi.category.entity;
 
 import com.ktpm.potatoapi.merchant.entity.Merchant;
+import com.ktpm.potatoapi.redis.RedisListener;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"merchant_id", "active_name"}))
+@EntityListeners(RedisListener.class)
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
