@@ -3,7 +3,7 @@ package com.ktpm.potatoapi.feedback.service;
 import com.ktpm.potatoapi.cloudinary.CloudinaryService;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
-import com.ktpm.potatoapi.common.utils.SecurityUtils;
+import com.ktpm.potatoapi.merchant.service.MerchantContextProvider;
 import com.ktpm.potatoapi.feedback.dto.FeedbackResponse;
 import com.ktpm.potatoapi.feedback.dto.ReplyFeedbackRequest;
 import com.ktpm.potatoapi.feedback.mapper.FeedbackMapper;
@@ -15,6 +15,7 @@ import com.ktpm.potatoapi.order.repo.OrderRepository;
 import com.ktpm.potatoapi.feedback.dto.GiveFeedbackRequest;
 import com.ktpm.potatoapi.feedback.entity.Feedback;
 import com.ktpm.potatoapi.feedback.repo.FeedbackRepository;
+import com.ktpm.potatoapi.security.AuthContextProvider;
 import com.ktpm.potatoapi.user.entity.User;
 import com.ktpm.potatoapi.user.repo.UserRepository;
 import lombok.AccessLevel;
@@ -38,14 +39,15 @@ public class FeedbackServiceImpl implements FeedbackService {
     UserRepository userRepository;
     OrderRepository orderRepository;
     MerchantRepository merchantRepository;
-    SecurityUtils securityUtils;
+    AuthContextProvider authContextProvider;
+    MerchantContextProvider merchantContextProvider;
     CloudinaryService cloudinaryService;
     FeedbackMapper mapper;
 
     @Override
     @Transactional
     public void giveFeedback(GiveFeedbackRequest request) {
-        User customer = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
+        User customer = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
@@ -97,7 +99,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     public FeedbackResponse replyFeedback(Long id, ReplyFeedbackRequest request) {
         Feedback customerFeedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
-        User merchantAdmin = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
+        User merchantAdmin = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Feedback feedback = buildFeedback(merchantAdmin, customerFeedback.getOrder(), customerFeedback.getMerchant());
@@ -109,7 +111,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public List<FeedbackResponse> getAllFeedbacksOfMyMerchant() {
-        return feedbackRepository.findAllByMerchantId(securityUtils.getCurrentMerchant().getId())
+        return feedbackRepository.findAllByMerchantId(merchantContextProvider.getCurrentMerchant().getId())
                 .stream()
                 .map(mapper::toResponse)
                 .toList();

@@ -5,7 +5,7 @@ import com.ktpm.potatoapi.category.repo.CategoryRepository;
 import com.ktpm.potatoapi.cloudinary.CloudinaryService;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
-import com.ktpm.potatoapi.common.utils.SecurityUtils;
+import com.ktpm.potatoapi.merchant.service.MerchantContextProvider;
 import com.ktpm.potatoapi.menu.dto.MenuItemDetailResponse;
 import com.ktpm.potatoapi.menu.dto.MenuItemRequest;
 import com.ktpm.potatoapi.menu.dto.MenuItemResponse;
@@ -35,12 +35,12 @@ public class MenuItemServiceImpl implements MenuItemService {
     MerchantRepository merchantRepository;
     CategoryRepository categoryRepository;
     CloudinaryService cloudinaryService;
-    SecurityUtils securityUtils;
+    MerchantContextProvider merchantContextProvider;
     OptionRepository optionRepository;
 
     @Override
     public List<MenuItemResponse> getAllMenuItemsOfMyMerchant() {
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         log.info("Get all menu items of merchant {} for Merchant Admin", merchant.getName());
 
@@ -80,7 +80,7 @@ public class MenuItemServiceImpl implements MenuItemService {
         Category category = categoryRepository.findByIdAndIsActiveTrue(menuItemRequest.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         MenuItem menuItem = menuItemMapper.toEntity(menuItemRequest);
         menuItem.setImgUrl(uploadMenuItemImage(menuItemRequest.getImgFile()));
@@ -107,8 +107,8 @@ public class MenuItemServiceImpl implements MenuItemService {
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         // Check menu item must be owned of current merchant
-        Merchant merchant = securityUtils.getCurrentMerchant();
-        if(!menuItem.getMerchant().equals(merchant))
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
+        if(!Objects.equals(menuItem.getMerchant().getId(), merchant.getId()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         menuItemMapper.updateMenuItem(menuItem, menuItemRequest);
@@ -127,8 +127,8 @@ public class MenuItemServiceImpl implements MenuItemService {
                 .orElseThrow(() -> new AppException(ErrorCode.MENU_ITEM_NOT_FOUND));
 
         // Check menu item must be owned of current merchant
-        Merchant merchant = securityUtils.getCurrentMerchant();
-        if (!merchant.equals(menuItem.getMerchant()))
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
+        if(!Objects.equals(menuItem.getMerchant().getId(), merchant.getId()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         menuItem.setVisible(isVisible);
@@ -143,8 +143,8 @@ public class MenuItemServiceImpl implements MenuItemService {
                 .orElseThrow(() -> new AppException(ErrorCode.MENU_ITEM_NOT_FOUND));
 
         // Check menu item must be owned of current merchant
-        Merchant merchant = securityUtils.getCurrentMerchant();
-        if(!menuItem.getMerchant().equals(merchant))
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
+        if(!Objects.equals(menuItem.getMerchant().getId(), merchant.getId()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         // Remove the menu item from all associated options

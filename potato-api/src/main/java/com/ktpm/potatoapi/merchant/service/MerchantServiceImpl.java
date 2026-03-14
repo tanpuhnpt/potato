@@ -8,7 +8,6 @@ import com.ktpm.potatoapi.user.repo.UserRepository;
 import com.ktpm.potatoapi.cloudinary.CloudinaryService;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
-import com.ktpm.potatoapi.common.utils.SecurityUtils;
 import com.ktpm.potatoapi.cuisinetype.entity.CuisineType;
 import com.ktpm.potatoapi.cuisinetype.repo.CuisineTypeRepository;
 import com.ktpm.potatoapi.mail.MailService;
@@ -51,7 +50,7 @@ public class MerchantServiceImpl implements MerchantService {
     MailService mailService;
     MerchantMapper merchantMapper;
     CloudinaryService cloudinaryService;
-    SecurityUtils securityUtils;
+    MerchantContextProvider merchantContextProvider;
 
     @Override
     public PageResponse<MerchantRegistrationResponse> getRegisteredMerchantsByStatus(RegistrationStatus status, int page, int size) {
@@ -231,7 +230,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantResponse getMyMerchant() {
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         log.info("Get {}'s information", merchant.getName());
 
@@ -242,7 +241,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantResponse updateMyMerchant(MerchantUpdateRequest request, MultipartFile imgFile) {
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         merchantMapper.update(merchant, request);
         merchant.setCuisineTypes(mapCuisineTypes(request.getCuisineTypes()));
@@ -258,7 +257,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public MerchantResponse updateMyMerchantOpenStatus(boolean isOpen) {
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         merchant.setOpen(isOpen);
         merchantRepository.save(merchant);

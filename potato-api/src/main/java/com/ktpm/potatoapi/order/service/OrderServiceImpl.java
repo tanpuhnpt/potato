@@ -4,7 +4,7 @@ import com.ktpm.potatoapi.cart.dto.CartItemRequest;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
 import com.ktpm.potatoapi.common.pagination.PageResponse;
-import com.ktpm.potatoapi.common.utils.SecurityUtils;
+import com.ktpm.potatoapi.merchant.service.MerchantContextProvider;
 import com.ktpm.potatoapi.drone.entity.Drone;
 import com.ktpm.potatoapi.drone.entity.DroneStation;
 import com.ktpm.potatoapi.drone.entity.DroneStatus;
@@ -27,6 +27,7 @@ import com.ktpm.potatoapi.order.mapper.OrderMapper;
 import com.ktpm.potatoapi.order.repo.OrderItemOptionValueRepository;
 import com.ktpm.potatoapi.order.repo.OrderItemRepository;
 import com.ktpm.potatoapi.order.repo.OrderRepository;
+import com.ktpm.potatoapi.security.AuthContextProvider;
 import com.ktpm.potatoapi.user.entity.User;
 import com.ktpm.potatoapi.user.repo.UserRepository;
 import lombok.AccessLevel;
@@ -53,7 +54,8 @@ public class OrderServiceImpl implements OrderService {
     OrderItemRepository orderItemRepository;
     MenuItemRepository menuItemRepository;
     OptionValueRepository optionValueRepository;
-    SecurityUtils securityUtils;
+    MerchantContextProvider merchantContextProvider;
+    AuthContextProvider authContextProvider;
     OrderItemOptionValueRepository orderItemOptionValueRepository;
     OrderItemMapper orderItemMapper;
     OrderItemOptionValueMapper orderItemOptionValueMapper;
@@ -63,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse createOrder(OrderRequest orderRequest) {
-        User customer = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
+        User customer = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // get merchant from menu item
@@ -90,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderResponse> getAllOrdersInProgress() {
-        User customer = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
+        User customer = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         List<OrderResponse> orderResponses = new ArrayList<>();
@@ -106,7 +108,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageResponse<OrderResponse> getOrderHistory(int page, int size) {
-        User customer = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
+        User customer = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -158,7 +160,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageResponse<OrderResponse> getOrdersOfMyMerchantByStatus(OrderStatus status, int page, int size) {
-        Long merchantId = securityUtils.getCurrentMerchant().getId();
+        Long merchantId = merchantContextProvider.getCurrentMerchant().getId();
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
@@ -179,7 +181,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // validate merchant ownership
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
         if (!order.getMerchant().equals(merchant))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 

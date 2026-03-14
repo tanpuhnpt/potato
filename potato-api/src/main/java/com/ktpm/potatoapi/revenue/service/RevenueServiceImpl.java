@@ -3,7 +3,7 @@ package com.ktpm.potatoapi.revenue.service;
 import com.ktpm.potatoapi.cloudinary.CloudinaryService;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
-import com.ktpm.potatoapi.common.utils.SecurityUtils;
+import com.ktpm.potatoapi.merchant.service.MerchantContextProvider;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.merchant.repo.MerchantRepository;
 import com.ktpm.potatoapi.revenue.dto.RevenueResponse;
@@ -26,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RevenueServiceImpl implements RevenueService {
-    SecurityUtils securityUtils;
+    MerchantContextProvider merchantContextProvider;
     RevenueTransactionRepository transactionRepository;
     MerchantRepository merchantRepository;
     CloudinaryService cloudinaryService;
@@ -34,7 +34,7 @@ public class RevenueServiceImpl implements RevenueService {
 
     @Override
     public RevenueResponse getMyRevenueInDateRange(LocalDate startDate, LocalDate endDate) {
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
@@ -43,7 +43,7 @@ public class RevenueServiceImpl implements RevenueService {
 
     @Override
     public List<RevenueTransactionResponse> getMyRevenueTransactionsInDateRange(LocalDate startDate, LocalDate endDate) {
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 

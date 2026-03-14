@@ -7,7 +7,7 @@ import com.ktpm.potatoapi.category.mapper.CategoryMapper;
 import com.ktpm.potatoapi.category.repo.CategoryRepository;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
-import com.ktpm.potatoapi.common.utils.SecurityUtils;
+import com.ktpm.potatoapi.merchant.service.MerchantContextProvider;
 import com.ktpm.potatoapi.menu.repo.MenuItemRepository;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.merchant.repo.MerchantRepository;
@@ -29,7 +29,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     CategoryRepository categoryRepository;
     CategoryMapper categoryMapper;
-    SecurityUtils securityUtils;
+    MerchantContextProvider merchantContextProvider;
     MerchantRepository merchantRepository;
     MenuItemRepository menuItemRepository;
     OptionRepository optionRepository;
@@ -37,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryResponse> getAllCategoriesOfMyMerchant() {
         List<Category> categories = categoryRepository
-                .findAllByMerchantIdAndIsActiveTrue(securityUtils.getCurrentMerchant().getId());
+                .findAllByMerchantIdAndIsActiveTrue(merchantContextProvider.getCurrentMerchant().getId());
 
         log.info("Get all categories for Merchant Admin");
 
@@ -65,7 +65,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         Category category = new Category();
         category.setName(categoryRequest.getName());
@@ -85,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         // Check category must be owned of current merchant
         if (!category.getMerchant().equals(merchant))
@@ -109,7 +109,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         // Check category must be owned by current merchant
         if (!category.getMerchant().equals(merchant))
