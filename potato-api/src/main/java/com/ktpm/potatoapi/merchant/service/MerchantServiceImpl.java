@@ -2,6 +2,7 @@ package com.ktpm.potatoapi.merchant.service;
 
 import com.ktpm.potatoapi.common.pagination.PageResponse;
 import com.ktpm.potatoapi.merchant.dto.*;
+import com.ktpm.potatoapi.redis.RedisService;
 import com.ktpm.potatoapi.user.entity.Role;
 import com.ktpm.potatoapi.user.entity.User;
 import com.ktpm.potatoapi.user.repo.UserRepository;
@@ -23,7 +24,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -51,20 +51,29 @@ public class MerchantServiceImpl implements MerchantService {
     MerchantMapper merchantMapper;
     CloudinaryService cloudinaryService;
     MerchantContextProvider merchantContextProvider;
+    RedisService redisService;
 
     @Override
     public PageResponse<MerchantRegistrationResponse> getRegisteredMerchantsByStatus(RegistrationStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        String key = String.format("registeredmerchant:%s:%d:%d", status.name(), page, size);
+        PageResponse<MerchantRegistrationResponse> pageResponse = redisService.get(key, PageResponse.class);
 
-        Page<MerchantRegistrationResponse> responsePage = registeredMerchantRepository
-                .findByRegistrationStatus(status, pageable)
-                .map(registeredMerchant -> {
-                    MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
-                    response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
-                    return response;
-                });
+        if (pageResponse == null) {
+            log.info("query registered merchant");
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        return PageResponse.from(responsePage);
+            pageResponse = PageResponse.from(registeredMerchantRepository
+                    .findByRegistrationStatus(status, pageable)
+                    .map(registeredMerchant -> {
+                        MerchantRegistrationResponse response = registeredMerchantMapper.toResponse(registeredMerchant);
+                        response.setCuisineTypes(mapCuisineTypeNames(registeredMerchant.getCuisineTypes()));
+                        return response;
+                    }));
+
+            redisService.save(key, pageResponse);
+        }
+
+        return pageResponse;
     }
 
     @Override
@@ -186,17 +195,24 @@ public class MerchantServiceImpl implements MerchantService {
     @Override
     public PageResponse<MerchantResponse> getAllMerchantsForSysAdmin(
             String name, Boolean isActive, Boolean isOpen, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        String key = String.format("merchant:%s:%b:%b:%d:%d", name, isActive, isOpen, page, size);
+        PageResponse<MerchantResponse> pageResponse = redisService.get(key, PageResponse.class);
 
-        Page<MerchantResponse> responsePage = merchantRepository
-                .findAllMerchants(name, isActive, isOpen, pageable)
-                .map(merchant -> {
-                    MerchantResponse merchantResponse = merchantMapper.toResponse(merchant);
-                    merchantResponse.setCuisineTypes(mapCuisineTypeNames(merchant.getCuisineTypes()));
-                    return merchantResponse;
-                });
+        if (pageResponse == null) {
+            log.info("query merchant");
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        return PageResponse.from(responsePage);
+            pageResponse = PageResponse.from(merchantRepository
+                    .findAllMerchants(name, isActive, isOpen, pageable)
+                    .map(merchant -> {
+                        MerchantResponse merchantResponse = merchantMapper.toResponse(merchant);
+                        merchantResponse.setCuisineTypes(mapCuisineTypeNames(merchant.getCuisineTypes()));
+                        return merchantResponse;
+                    }));
+
+            redisService.save(key, pageResponse);
+        }
+        return pageResponse;
     }
 
     @Override
@@ -271,18 +287,25 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public PageResponse<MerchantResponse> getAllMerchantsForCustomer(String name, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        String key = String.format("merchant:%s:%d:%d", name, page, size);
+        PageResponse<MerchantResponse> pageResponse = redisService.get(key, PageResponse.class);
 
-        Page<MerchantResponse> responsePage = merchantRepository
-//                .findAllByIsOpenTrue(pageable)
-                .findAllMerchants(name, true, true, pageable)
-                .map(merchant -> {
-                    MerchantResponse merchantResponse = merchantMapper.toResponse(merchant);
-                    merchantResponse.setCuisineTypes(mapCuisineTypeNames(merchant.getCuisineTypes()));
-                    return merchantResponse;
-                });
+        if (pageResponse == null) {
+            log.info("query merchant");
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
 
-        return PageResponse.from(responsePage);
+            pageResponse = PageResponse.from(merchantRepository
+                    .findAllMerchants(name, true, true, pageable)
+                    .map(merchant -> {
+                        MerchantResponse merchantResponse = merchantMapper.toResponse(merchant);
+                        merchantResponse.setCuisineTypes(mapCuisineTypeNames(merchant.getCuisineTypes()));
+                        return merchantResponse;
+                    }));
+
+            redisService.save(key, pageResponse);
+        }
+
+        return pageResponse;
     }
 
     @Override
