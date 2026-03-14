@@ -1,4 +1,4 @@
-package com.ktpm.potatoapi.common.config.cloudinary;
+package com.ktpm.potatoapi.cloudinary;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

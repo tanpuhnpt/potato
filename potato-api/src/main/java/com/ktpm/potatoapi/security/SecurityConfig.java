@@ -1,4 +1,4 @@
-package com.ktpm.potatoapi.common.config.security;
+package com.ktpm.potatoapi.security;
 
 import com.ktpm.potatoapi.user.service.AuthService;
 import lombok.AccessLevel;
