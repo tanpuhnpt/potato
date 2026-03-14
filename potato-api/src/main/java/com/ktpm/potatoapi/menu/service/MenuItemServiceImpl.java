@@ -15,6 +15,7 @@ import com.ktpm.potatoapi.menu.repo.MenuItemRepository;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.merchant.repo.MerchantRepository;
 import com.ktpm.potatoapi.option.repo.OptionRepository;
+import com.ktpm.potatoapi.redis.RedisService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -37,33 +39,52 @@ public class MenuItemServiceImpl implements MenuItemService {
     CloudinaryService cloudinaryService;
     MerchantContextProvider merchantContextProvider;
     OptionRepository optionRepository;
+    RedisService redisService;
 
     @Override
     public List<MenuItemResponse> getAllMenuItemsOfMyMerchant() {
-        Merchant merchant = merchantContextProvider.getCurrentMerchant();
+        Long merchantId = merchantContextProvider.getCurrentMerchant().getId();
 
-        log.info("Get all menu items of merchant {} for Merchant Admin", merchant.getName());
+        String key = String.format("menuitem:merchant:%d", merchantId);
+        List<MenuItemResponse> responses = redisService.getAll(key, MenuItemResponse.class);
 
-        return menuItemRepository.findAllByMerchantIdAndIsActiveTrue(merchant.getId())
-                .stream()
-                .map(menuItemMapper::toMenuItemResponse)
-                .toList();
+        if (responses == null) {
+            log.info("query menu item");
+            responses = menuItemRepository
+                    .findAllByMerchantIdAndIsActiveTrue(merchantId)
+                    .stream()
+                    .map(menuItemMapper::toMenuItemResponse)
+                    .toList();
+
+            redisService.saveAll(key, responses);
+        }
+
+        return responses;
     }
 
     @Override
     public List<MenuItemResponse> getAllMenuItemsForCustomer(Long merchantId) {
-        Merchant merchant = merchantRepository.findById(merchantId)
-                .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
+        String key = String.format("menuitem:customer:merchant:%d", merchantId);
+        List<MenuItemResponse> responses = redisService.getAll(key, MenuItemResponse.class);
 
-        if (!merchant.isOpen())
-            throw new AppException(ErrorCode.MERCHANT_CLOSED);
+        if (responses == null) {
+            log.info("query menu item");
+            Merchant merchant = merchantRepository.findById(merchantId)
+                    .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
 
-        log.info("Get all menu items of merchant {} for Customer", merchant.getName());
+            if (!merchant.isOpen())
+                throw new AppException(ErrorCode.MERCHANT_CLOSED);
 
-        return menuItemRepository.findAllByMerchantIdAndIsVisibleTrue(merchant.getId())
-                .stream()
-                .map(menuItemMapper::toMenuItemResponse)
-                .toList();
+            responses = menuItemRepository
+                    .findAllByMerchantIdAndIsVisibleTrue(merchantId)
+                    .stream()
+                    .map(menuItemMapper::toMenuItemResponse)
+                    .toList();
+
+            redisService.saveAll(key, responses);
+        }
+
+        return responses;
     }
 
     @Override

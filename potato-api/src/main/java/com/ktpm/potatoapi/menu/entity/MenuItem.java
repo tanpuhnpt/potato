@@ -3,6 +3,7 @@ package com.ktpm.potatoapi.menu.entity;
 import com.ktpm.potatoapi.category.entity.Category;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.option.entity.Option;
+import com.ktpm.potatoapi.redis.RedisListener;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"merchant_id", "active_name"}))
+@EntityListeners(RedisListener.class)
 public class MenuItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
