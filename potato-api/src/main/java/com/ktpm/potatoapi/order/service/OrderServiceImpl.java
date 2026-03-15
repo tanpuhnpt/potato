@@ -4,7 +4,6 @@ import com.ktpm.potatoapi.cart.dto.CartItemRequest;
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
 import com.ktpm.potatoapi.common.pagination.PageResponse;
-import com.ktpm.potatoapi.merchant.service.MerchantContextProvider;
 import com.ktpm.potatoapi.drone.entity.Drone;
 import com.ktpm.potatoapi.drone.entity.DroneStation;
 import com.ktpm.potatoapi.drone.entity.DroneStatus;
@@ -13,6 +12,7 @@ import com.ktpm.potatoapi.drone.repo.DroneStationRepository;
 import com.ktpm.potatoapi.menu.entity.MenuItem;
 import com.ktpm.potatoapi.menu.repo.MenuItemRepository;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
+import com.ktpm.potatoapi.merchant.service.MerchantContextProvider;
 import com.ktpm.potatoapi.option.entity.Option;
 import com.ktpm.potatoapi.option.entity.OptionValue;
 import com.ktpm.potatoapi.option.repo.OptionValueRepository;
@@ -27,6 +27,7 @@ import com.ktpm.potatoapi.order.mapper.OrderMapper;
 import com.ktpm.potatoapi.order.repo.OrderItemOptionValueRepository;
 import com.ktpm.potatoapi.order.repo.OrderItemRepository;
 import com.ktpm.potatoapi.order.repo.OrderRepository;
+import com.ktpm.potatoapi.redis.RedisService;
 import com.ktpm.potatoapi.security.AuthContextProvider;
 import com.ktpm.potatoapi.user.entity.User;
 import com.ktpm.potatoapi.user.repo.UserRepository;
@@ -34,7 +35,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -61,6 +61,7 @@ public class OrderServiceImpl implements OrderService {
     OrderItemOptionValueMapper orderItemOptionValueMapper;
     DroneRepository droneRepository;
     DroneStationRepository droneStationRepository;
+    RedisService redisService;
 
     @Override
     @Transactional
@@ -108,25 +109,35 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageResponse<OrderResponse> getOrderHistory(int page, int size) {
-        User customer = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        String key = String.format("order:history:%d:%d", page, size);
+        PageResponse<OrderResponse> pageResponse = redisService.get(key, PageResponse.class);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        if (pageResponse == null) {
+            log.info("query order history");
+            User customer = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        Page<OrderResponse> responsePage = orderRepository
-                .getOrderHistoryByCustomer(customer.getId(), pageable)
-                .map(order -> {
-                    List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
-                    OrderResponse response = orderMapper.toResponse(order);
-                    response.setOrderItems(orderItemResponses);
-                    return response;
-                });
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        return PageResponse.from(responsePage);
+            pageResponse = PageResponse.from(orderRepository
+                    .getOrderHistoryByCustomer(customer.getId(), pageable)
+                    .map(order -> {
+                        List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
+                        OrderResponse response = orderMapper.toResponse(order);
+                        response.setOrderItems(orderItemResponses);
+                        return response;
+                    }));
+
+            redisService.save(key, pageResponse);
+        }
+
+        return pageResponse;
     }
 
     @Override
     public OrderResponse confirmOrderCompleted(Long orderId) {
+        User customer = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -134,6 +145,10 @@ public class OrderServiceImpl implements OrderService {
         OrderStatus currentStatus = order.getStatus();
         if (currentStatus == OrderStatus.CANCELED)
             throw new AppException(ErrorCode.ORDER_STATUS_INVALID_FOR_UPDATE);
+
+        // verify customer ownership
+        if (!Objects.equals(order.getCustomer().getId(), customer.getId()))
+            throw new AppException(ErrorCode.ORDER_NOT_OWNED_BY_CURRENT_USER);
 
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
@@ -160,19 +175,28 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageResponse<OrderResponse> getOrdersOfMyMerchantByStatus(OrderStatus status, int page, int size) {
-        Long merchantId = merchantContextProvider.getCurrentMerchant().getId();
+        String key = String.format("order:my-merchant:%s:%d:%d", status.name(), page, size);
+        PageResponse<OrderResponse> pageResponse = redisService.get(key, PageResponse.class);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        if (pageResponse == null) {
+            log.info("query my merchant's orders");
+            Long merchantId = merchantContextProvider.getCurrentMerchant().getId();
 
-        Page<OrderResponse> responsePage = orderRepository
-                .findAllByMerchantIdAndStatus(merchantId, status, pageable)
-                .map(order -> {
-                    List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
-                    OrderResponse orderResponse = orderMapper.toResponse(order);
-                    orderResponse.setOrderItems(orderItemResponses);
-                    return orderResponse;
-                });
-        return PageResponse.from(responsePage);
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+            pageResponse = PageResponse.from(orderRepository
+                    .findAllByMerchantIdAndStatus(merchantId, status, pageable)
+                    .map(order -> {
+                        List<OrderItemResponse> orderItemResponses = mapOrderItemsWithOptionValuesToResponse(order.getOrderItems());
+                        OrderResponse orderResponse = orderMapper.toResponse(order);
+                        orderResponse.setOrderItems(orderItemResponses);
+                        return orderResponse;
+                    }));
+
+            redisService.save(key, pageResponse);
+        }
+
+        return pageResponse;
     }
 
     @Override
@@ -182,7 +206,7 @@ public class OrderServiceImpl implements OrderService {
 
         // validate merchant ownership
         Merchant merchant = merchantContextProvider.getCurrentMerchant();
-        if (!order.getMerchant().equals(merchant))
+        if (!Objects.equals(order.getMerchant().getId(), merchant.getId()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         // parse order status request

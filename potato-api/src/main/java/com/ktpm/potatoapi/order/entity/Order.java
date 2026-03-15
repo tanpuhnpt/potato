@@ -5,6 +5,7 @@ import com.ktpm.potatoapi.common.utils.PhoneUtils;
 import com.ktpm.potatoapi.drone.entity.Drone;
 import com.ktpm.potatoapi.feedback.entity.Feedback;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
+import com.ktpm.potatoapi.redis.RedisListener;
 import com.ktpm.potatoapi.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,6 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "`order`")
+@EntityListeners(RedisListener.class)
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
