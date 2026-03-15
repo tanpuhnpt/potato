@@ -2,6 +2,7 @@ package com.ktpm.potatoapi.feedback.entity;
 
 import com.ktpm.potatoapi.merchant.entity.Merchant;
 import com.ktpm.potatoapi.order.entity.Order;
+import com.ktpm.potatoapi.redis.RedisListener;
 import com.ktpm.potatoapi.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(RedisListener.class)
 public class Feedback {
 
     @Id

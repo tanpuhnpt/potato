@@ -12,7 +12,6 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findAllByMerchantIdAndStatus(Long merchantId, OrderStatus status, Pageable pageable);
-    boolean existsByIdAndCustomerId(Long id, Long customerId);
 
     @Query(value = """
         FROM Order o
