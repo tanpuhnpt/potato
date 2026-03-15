@@ -2,7 +2,7 @@ package com.ktpm.potatoapi.user.service;
 
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
-import com.ktpm.potatoapi.common.utils.SecurityUtils;
+import com.ktpm.potatoapi.security.AuthContextProvider;
 import com.ktpm.potatoapi.user.dto.ChangePasswordRequest;
 import com.ktpm.potatoapi.user.entity.User;
 import com.ktpm.potatoapi.user.repo.UserRepository;
@@ -19,12 +19,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AccountServiceImpl implements AccountService {
     UserRepository userRepository;
-    SecurityUtils securityUtils;
+    AuthContextProvider authContextProvider;
     PasswordEncoder passwordEncoder;
 
     @Override
     public void changePassword(ChangePasswordRequest request) {
-        User user = userRepository.findByEmail(securityUtils.getCurrentUserEmail())
+        User user = userRepository.findByEmail(authContextProvider.getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // Check current password and new password are different

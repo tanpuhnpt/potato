@@ -1,5 +1,6 @@
 package com.ktpm.potatoapi.user.service;
 
+import com.ktpm.potatoapi.redis.RedisService;
 import com.ktpm.potatoapi.user.dto.AuthResponse;
 import com.ktpm.potatoapi.user.dto.LogInRequest;
 import com.ktpm.potatoapi.user.dto.SignUpRequest;
@@ -27,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
     UserMapper userMapper;
+    RedisService redisService;
 
     @Override
     public AuthResponse signUp(SignUpRequest signUpRequest) {
@@ -60,8 +62,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        String key = "user:" + email;
+        User user = redisService.get(key, User.class);
+
+        if (user == null) {
+            log.info("query db");
+            user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+            redisService.save(key, user);
+        }
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())

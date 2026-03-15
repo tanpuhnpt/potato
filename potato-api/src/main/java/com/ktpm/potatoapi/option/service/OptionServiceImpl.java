@@ -2,7 +2,7 @@ package com.ktpm.potatoapi.option.service;
 
 import com.ktpm.potatoapi.common.exception.AppException;
 import com.ktpm.potatoapi.common.exception.ErrorCode;
-import com.ktpm.potatoapi.common.utils.SecurityUtils;
+import com.ktpm.potatoapi.merchant.service.MerchantContextProvider;
 import com.ktpm.potatoapi.menu.entity.MenuItem;
 import com.ktpm.potatoapi.menu.repo.MenuItemRepository;
 import com.ktpm.potatoapi.merchant.entity.Merchant;
@@ -32,14 +32,14 @@ public class OptionServiceImpl implements OptionService {
     OptionRepository optionRepository;
     OptionMapper optionMapper;
     OptionValueMapper optionValueMapper;
-    SecurityUtils securityUtils;
+    MerchantContextProvider merchantContextProvider;
     OptionValueRepository optionValueRepository;
     MenuItemRepository menuItemRepository;
 
     @Override
     public List<OptionResponse> getAllOptionsOfMyMerchant() {
         List<Option> options = optionRepository.findAllByMerchantIdAndIsActiveTrue(
-                securityUtils.getCurrentMerchant().getId());
+                merchantContextProvider.getCurrentMerchant().getId());
         log.info("Get all options for Merchant Admin");
 
         return options
@@ -55,7 +55,7 @@ public class OptionServiceImpl implements OptionService {
 
         // validate merchant ownership
         Merchant merchantOfOption = option.getMerchant();
-        if (!merchantOfOption.equals(securityUtils.getCurrentMerchant()))
+        if (!merchantOfOption.equals(merchantContextProvider.getCurrentMerchant()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         return optionMapper.toOptionDetailResponse(option);
@@ -64,7 +64,7 @@ public class OptionServiceImpl implements OptionService {
     @Override
     @Transactional
     public OptionResponse createOptionAndOptionValue(OptionCreationRequest request) {
-        Merchant merchant = securityUtils.getCurrentMerchant();
+        Merchant merchant = merchantContextProvider.getCurrentMerchant();
 
         // map request to entity
         Option option = Option.builder()
@@ -104,7 +104,7 @@ public class OptionServiceImpl implements OptionService {
 
         // validate merchant ownership
         Merchant merchantOfOption = option.getMerchant();
-        if (!merchantOfOption.equals(securityUtils.getCurrentMerchant()))
+        if (!merchantOfOption.equals(merchantContextProvider.getCurrentMerchant()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         OptionValue optionValue = optionValueMapper.toEntity(request);
@@ -134,7 +134,7 @@ public class OptionServiceImpl implements OptionService {
 
         // validate merchant ownership
         Merchant merchantOfOption = option.getMerchant();
-        if (!merchantOfOption.equals(securityUtils.getCurrentMerchant()))
+        if (!merchantOfOption.equals(merchantContextProvider.getCurrentMerchant()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         option.setName(request.getName());
@@ -158,7 +158,7 @@ public class OptionServiceImpl implements OptionService {
 
         // validate merchant ownership
         Merchant merchantOfOption = optionOfOptionValue.getMerchant();
-        if (!merchantOfOption.equals(securityUtils.getCurrentMerchant()))
+        if (!merchantOfOption.equals(merchantContextProvider.getCurrentMerchant()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         optionValue.setName(request.getName());
@@ -184,7 +184,7 @@ public class OptionServiceImpl implements OptionService {
 
         // validate merchant ownership
         Merchant merchantOfOption = optionOfOptionValue.getMerchant();
-        if (!merchantOfOption.equals(securityUtils.getCurrentMerchant()))
+        if (!merchantOfOption.equals(merchantContextProvider.getCurrentMerchant()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         optionValue.setVisible(isVisible);
@@ -220,7 +220,7 @@ public class OptionServiceImpl implements OptionService {
 
         // validate merchant ownership
         Merchant merchantOfOption = option.getMerchant();
-        if (!merchantOfOption.equals(securityUtils.getCurrentMerchant()))
+        if (!merchantOfOption.equals(merchantContextProvider.getCurrentMerchant()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         List<MenuItem> menuItems =  menuItemRepository.findAllByIdInAndMerchantIdAndIsActiveTrue(
@@ -247,7 +247,7 @@ public class OptionServiceImpl implements OptionService {
 
         // validate merchant ownership
         Merchant merchantOfOption = optionOfOptionValue.getMerchant();
-        if (!merchantOfOption.equals(securityUtils.getCurrentMerchant()))
+        if (!merchantOfOption.equals(merchantContextProvider.getCurrentMerchant()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         optionValue.setActive(false);
@@ -283,7 +283,7 @@ public class OptionServiceImpl implements OptionService {
 
         // validate merchant ownership
         Merchant merchantOfOption = option.getMerchant();
-        if (!merchantOfOption.equals(securityUtils.getCurrentMerchant()))
+        if (!merchantOfOption.equals(merchantContextProvider.getCurrentMerchant()))
             throw new AppException(ErrorCode.MUST_BE_OWNED_OF_CURRENT_MERCHANT);
 
         option.setActive(false);

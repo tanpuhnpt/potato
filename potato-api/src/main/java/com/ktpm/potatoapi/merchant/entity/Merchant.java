@@ -1,5 +1,6 @@
 package com.ktpm.potatoapi.merchant.entity;
 
+import com.ktpm.potatoapi.redis.RedisListener;
 import com.ktpm.potatoapi.user.entity.User;
 import com.ktpm.potatoapi.cuisinetype.entity.CuisineType;
 import jakarta.persistence.*;
@@ -16,6 +17,7 @@ import java.util.Set;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(RedisListener.class)
 public class Merchant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
